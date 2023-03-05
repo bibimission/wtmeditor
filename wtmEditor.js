@@ -2,6 +2,7 @@ const pathInput = document.getElementById("folderInput");
 var files = [];
 var photoInEdit = null;
 var currentPhotoshootTab = "";
+var currentEventTab = "";
 document.getElementById("loadButt").onclick = function(){
 	var lePath = pathInput.value;
 	getFiles(lePath, function(data){
@@ -28,6 +29,7 @@ document.getElementById("closeHelpButt").onclick = function(){
 document.getElementById("helpbutt").onclick = function(){
 	showHelpModal(true);
 };
+document.getElementById("eventSaveButt").onclick = saveEventInformation;
 
 /*
 sendPostRequest("convertGif", "masturb.gif", function(d){
@@ -380,6 +382,160 @@ function savePhotoInformation(){
 
 function displayEventSection(){
 	showFrame("EventsSection");
+	var imgGrid = document.getElementById("event_img");
+	var eventList = document.getElementById("eventList");
+	eventList.innerHTML = "";
+	var eventFolders = files.filter(function(p){
+		if(p.includes("/events/")){
+			return p.split("/events/")[1].split("/").length == 1;
+		}
+		return false;
+	});
+	eventFolders.forEach(function(f){
+		
+		var folderButton = document.createElement("div");
+		folderButton.innerHTML = f.split("/").slice(-1);
+		folderButton.classList.add("tabButton");
+		folderButton.onclick = function(){
+			var photoTabs = document.getElementsByClassName("photoTab");
+			for(var t of photoTabs){
+				t.classList.add("hidden");
+			}
+			document.getElementById(f.split("/").slice(-1)+"_tab").classList.remove("hidden");
+			document.getElementById("eventForm").classList.remove("hidden");
+			currentEventTab = f.split("/").slice(-1);
+			
+			// Form Info
+			getFile(pathInput.value+"/events/"+currentEventTab+"/eventConfig.ini", function(d){
+				if(d.success){
+					var lines = d.file.split("\n");
+					lines.forEach(function(l){
+						if(l.split("event_name").length > 1){
+							document.getElementById("event_name").value = l.split("event_name")[1].trim().substring(1).trim();
+						}
+						if(l.split("event_label").length > 1){
+							document.getElementById("event_label").value = l.split("event_label")[1].trim().substring(1).trim();
+						}
+						if(l.split("occurrence").length > 1){
+							document.getElementById("event_occurrence").value = parseInt(l.split("occurrence")[1].trim().substring(1).trim(),10);
+						}
+						if(l.split("cooldown").length > 1){
+							document.getElementById("event_cooldown").value = parseInt(l.split("cooldown")[1].trim().substring(1).trim(),10);
+						}
+						if(l.split("modder").length > 1){
+							document.getElementById("event_modder").value = l.split("modder")[1].trim().substring(1).trim();
+						}
+						if(l.split("source").length > 1){
+							document.getElementById("event_source").value = l.split("source")[1].trim().substring(1).trim();
+						}
+						if(l.split("allowedDays").length > 1){
+							var days = l.split("allowedDays")[1].trim().substring(1).trim().split(",");
+							for(var ch of document.getElementsByClassName("dayCheck")){
+								ch.checked = false;
+							}
+							days.forEach(function(day){
+								document.getElementById("day"+day).checked = true;
+							});
+						}
+						if(l.split("stats_inacdf").length > 1){
+							var tokens = l.split("stats_inacdf")[1].trim().substring(1).trim().split(",");
+							document.getElementById("event_int").value = parseInt(tokens[0],10);
+							document.getElementById("event_nat").value = parseInt(tokens[1],10);
+							document.getElementById("event_aff").value = parseInt(tokens[2],10);
+							document.getElementById("event_cor").value = parseInt(tokens[3],10);
+							document.getElementById("event_dis").value = parseInt(tokens[4],10);
+							document.getElementById("event_fea").value = parseInt(tokens[5],10);
+						}
+					});
+				}
+			});
+			
+		};
+		eventList.appendChild(folderButton);
+		
+		var imgDiv = document.createElement("div");
+		imgDiv.classList.add("imgGrid");
+		imgDiv.classList.add("photoTab");
+		imgDiv.classList.add("hidden");
+		imgDiv.id=f.split("/").slice(-1)+"_tab";
+		
+		var photos = files.filter(p => p.split(f).length > 1 && p != f && p.split(".")[1] != "ini");
+		photos.forEach(function(fp){
+			if(fp.split(".")[1] != "webm"){
+				var imgEl = document.createElement('img');
+				imgEl.src = fp;
+				imgEl.title = fp.split("/").slice(-1);
+				if(fp.split(".")[1] == "gif"){
+					imgEl.classList.add("invalid");
+					imgEl.onclick = function(){
+						convertToWebm(fp, function(d){
+							imgEl.classList.add("hidden");
+							var vidEl = document.createElement("video");
+							vidEl.autoplay = true;
+							vidEl.loop = true;
+							vidEl.src = fp.split(".")[0]+".webm";
+							imgDiv.appendChild(vidEl);
+						});
+					};
+				}else if(fp.split(".")[1] != "webp"){
+					imgEl.classList.add("invalid");
+					imgEl.onclick = function(){
+						convertToWebp(fp, function(d){
+							imgEl.classList.remove("invalid");
+							imgEl.src = fp.split(".")[0]+".webp";
+						});
+					};
+				}
+				imgDiv.appendChild(imgEl);
+			}else{
+				var imgEl = document.createElement("video");
+				imgEl.autoplay = true;
+				imgEl.loop = true;
+				imgEl.src = fp;
+				imgEl.title = fp.split("/").slice(-1);
+				imgDiv.appendChild(imgEl);
+			}
+		});
+		imgGrid.appendChild(imgDiv);
+	});
+}
+
+function saveEventInformation(){
+	var iniText = "[info]\n";
+	iniText += "event_name = " + document.getElementById("event_name").value+"\n";
+	iniText += "event_label = " + document.getElementById("event_label").value+"\n";
+	iniText += "occurence = " + document.getElementById("event_occurence").value+"\n";
+	iniText += "cooldown = " + document.getElementById("event_cooldown").value+"\n";
+	
+	iniText += "allowedDays = ";
+	iniText += document.getElementById("day1").checked ? "1," : "";
+	iniText += document.getElementById("day2").checked ? "2," : "";
+	iniText += document.getElementById("day3").checked ? "3," : "";
+	iniText += document.getElementById("day4").checked ? "4," : "";
+	iniText += document.getElementById("day5").checked ? "5," : "";
+	iniText += document.getElementById("day6").checked ? "6," : "";
+	iniText += document.getElementById("day7").checked ? "7," : "";
+	iniText = iniText.substring(0, iniText.length - 1);
+	iniText += "\n";
+	
+	
+	iniText += "source = " + document.getElementById("event_source").value+"\n";
+	iniText += "modder = " + document.getElementById("event_modder").value+"\n";
+	
+	iniText += "[requirements]\n";
+	
+	iniText += "stats_inacdf = " + document.getElementById("event_int").value+",";
+	iniText += document.getElementById("event_nat").value+",";
+	iniText += document.getElementById("event_aff").value+",";
+	iniText += document.getElementById("event_cor").value+",";
+	iniText += document.getElementById("event_dis").value+",";
+	iniText += document.getElementById("event_fea").value;
+	iniText += "\n";
+	
+	
+	setFile(pathInput.value+"/events/"+currentEventTab+"/eventConfig.ini", iniText,function(d){
+		console.log(d);
+	});
 }
 
 function closeModal(){

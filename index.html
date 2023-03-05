@@ -10,7 +10,7 @@
 		<button class="helpbutt" id="helpbutt">?</button>
 		<div class="center firstHead">
 			<label for="folderInput">Girl folder path</label>
-			<input type="text" id="folderInput" value="1_Chastity_Lynn"/>
+			<input type="text" id="folderInput" value=""/>
 			<button id="loadButt" class="importantButt">Load</button>
 			<button id="createButt" class="importantButt">Create</button>
 		</div>
@@ -70,7 +70,9 @@
 			</div>
 			<div class="frame" id="EventsSection">
 				<div id="eventList"></div>
-				<div id="eventDetail"></div>
+				<div id="eventDetail">
+					<div id="event_img"></div>
+				</div>
 				<div id="eventForm" class="hidden">
 					<label for="event_name">Event Name</label>
 					<input type="text" id="event_name"/>
@@ -87,25 +89,25 @@
 					<fieldset>
 						<legend>Allowed Days</legend>
 						<label for="day1">Monday</label>
-						<input type="checkbox" id="day1"/>
+						<input class="dayCheck" type="checkbox" id="day1"/>
 						
 						<label for="day2">Tuesday</label>
-						<input type="checkbox" id="day2"/>
+						<input class="dayCheck" type="checkbox" id="day2"/>
 						
 						<label for="day3">Wednesday</label>
-						<input type="checkbox" id="day3"/>
+						<input class="dayCheck" type="checkbox" id="day3"/>
 						
 						<label for="day4">Thursday</label>
-						<input type="checkbox" id="day4"/>
+						<input class="dayCheck" type="checkbox" id="day4"/>
 						
 						<label for="day5">Friday</label>
-						<input type="checkbox" id="day5"/>
+						<input class="dayCheck" type="checkbox" id="day5"/>
 						
 						<label for="day6">Saturday</label>
-						<input type="checkbox" id="day6"/>
+						<input class="dayCheck" type="checkbox" id="day6"/>
 						
 						<label for="day7">Sunday</label>
-						<input type="checkbox" id="day7"/>
+						<input class="dayCheck" type="checkbox" id="day7"/>
 					</fieldset>
 					
 					<label for="event_source">Event Source</label>
@@ -118,23 +120,24 @@
 						<legend>Requirements</legend>
 						
 						<label for="event_int">Intellect</label>
-						<input type="number" id="event_int"/>
+						<input type="number" id="event_int" value=0/>
 						
 						<label for="event_nat">Naturism</label>
-						<input type="number" id="event_nat"/>
+						<input type="number" id="event_nat" value=0/>
 						
 						<label for="event_aff">Affection</label>
-						<input type="number" id="event_aff"/>
+						<input type="number" id="event_aff" value=0/>
 						
 						<label for="event_cor">Corruption</label>
-						<input type="number" id="event_cor"/>
+						<input type="number" id="event_cor" value=0/>
 						
 						<label for="event_dis">Disciplin</label>
-						<input type="number" id="event_dis"/>
+						<input type="number" id="event_dis" value=0/>
 						
 						<label for="event_fea">Fear</label>
-						<input type="number" id="event_fea"/>
+						<input type="number" id="event_fea" value=0/>
 					</fieldset>
+					<button class="importantButt w-100" id="eventSaveButt">Save</button>
 				</div>
 			</div>
 			<div class="frame" id="PhotoshotsSection">
@@ -232,7 +235,8 @@
 			<div class="modal-header">How to use the Awesome WTM Editor ?</div>
 			<div class="modal-body">
 				<p>This tool goal is to help modders to easily create and update girl packs. It manages folders creation, .ini files and image converting.</p>
-				<p>It does'nt allows event management yet. It will come in future update.</p>
+				<p>The folders you want to edit have to be in the wtmeditor folder. It can't detect files in parent folders.</p>
+				<p>It does'nt allows event code management yet. It will come in future update.</p>
 				<br>
 				<p>Here's a detailed pack creation procedure :</p>
 				<ul>
