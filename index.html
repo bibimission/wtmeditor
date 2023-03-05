@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>WTM Editor</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<h1 class="center superfont">Awesome WTM Editor</h1>
+		<button class="helpbutt" id="helpbutt">?</button>
+		<div class="center firstHead">
+			<label for="folderInput">Girl folder path</label>
+			<input type="text" id="folderInput" value="1_Chastity_Lynn"/>
+			<button id="loadButt" class="importantButt">Load</button>
+			<button id="createButt" class="importantButt">Create</button>
+		</div>
+		
+		<div class="menu hidden" id="menu">
+			<button id="girlButt">Girl info</button>
+			<button id="bodyButt">Bodyparts</button>
+			<button id="eventButt">Events</button>
+			<button id="photoButt">Photoshoots</button>
+			<button id="vidsButt">Vids</button>
+		</div>
+		
+		<div id="content" class="hidden">
+			<div class="frame" id="GirlInfoSection">
+				<label for="first_name">First Name</label>
+				<input type="text" id="first_name"/>
+				<label for="last_name">Last Name</label>
+				<input type="text" id="last_name"/>
+				
+				<label for="traits">Traits</label>
+				<input type="text" id="traits"/>
+				
+				<label for="source">Source</label>
+				<input type="text" id="source"/>
+				<label for="modder_name">Modder Name</label>
+				<input type="text" id="modder_name"/>
+				
+				<label for="sensitive_area">Sensitive Area</label>
+				<select id="sensitive_area">
+					<option>Ass</option>
+					<option>Boobs</option>
+					<option>Pussy</option>
+					<option>Legs</option>
+				</select>
+				
+				<button id="saveGirl" class="center importantButt w-100">Save</button>
+				
+			</div>
+			<div class="frame" id="BodyPartsSection">
+				<div>
+					<div>Face</div>
+					<div class="imgGrid" id="facePics"></div>
+				</div>
+				<div>
+					<div>Boobs</div>
+					<div class="imgGrid" id="boobsPics"></div>
+				</div>
+				<div>
+					<div>Pussy</div>
+					<div class="imgGrid" id="pussyPics"></div>
+				</div>
+				<div>
+					<div>Ass</div>
+					<div class="imgGrid" id="assPics"></div>
+				</div>
+				<div></div>
+			</div>
+			<div class="frame" id="EventsSection">
+				<div id="eventList"></div>
+				<div id="eventDetail"></div>
+				<div id="eventForm" class="hidden">
+					<label for="event_name">Event Name</label>
+					<input type="text" id="event_name"/>
+					
+					<label for="event_label">Event Label</label>
+					<input type="text" id="event_label"/>
+					
+					<label for="event_occurence">Event Occurence</label>
+					<input type="number" id="event_occurence"/>
+					
+					<label for="event_cooldown">Event Cooldown</label>
+					<input type="number" id="event_cooldown"/>
+					
+					<fieldset>
+						<legend>Allowed Days</legend>
+						<label for="day1">Monday</label>
+						<input type="checkbox" id="day1"/>
+						
+						<label for="day2">Tuesday</label>
+						<input type="checkbox" id="day2"/>
+						
+						<label for="day3">Wednesday</label>
+						<input type="checkbox" id="day3"/>
+						
+						<label for="day4">Thursday</label>
+						<input type="checkbox" id="day4"/>
+						
+						<label for="day5">Friday</label>
+						<input type="checkbox" id="day5"/>
+						
+						<label for="day6">Saturday</label>
+						<input type="checkbox" id="day6"/>
+						
+						<label for="day7">Sunday</label>
+						<input type="checkbox" id="day7"/>
+					</fieldset>
+					
+					<label for="event_source">Event Source</label>
+					<input type="text" id="event_source"/>
+					
+					<label for="event_modder">Event Modder</label>
+					<input type="text" id="event_modder"/>
+					
+					<fieldset>
+						<legend>Requirements</legend>
+						
+						<label for="event_int">Intellect</label>
+						<input type="number" id="event_int"/>
+						
+						<label for="event_nat">Naturism</label>
+						<input type="number" id="event_nat"/>
+						
+						<label for="event_aff">Affection</label>
+						<input type="number" id="event_aff"/>
+						
+						<label for="event_cor">Corruption</label>
+						<input type="number" id="event_cor"/>
+						
+						<label for="event_dis">Disciplin</label>
+						<input type="number" id="event_dis"/>
+						
+						<label for="event_fea">Fear</label>
+						<input type="number" id="event_fea"/>
+					</fieldset>
+				</div>
+			</div>
+			<div class="frame" id="PhotoshotsSection">
+				<div id="photoshootChoose" class="tabList"></div>
+				<div id="photoshootview"></div>
+				<div id="photoshootForm" class="hidden">				
+					<label for="photoShootName">Photoshoot Name</label>
+					<input id="photoShootName">
+					
+					<label for="photoShootTraits">Photoshoot Traits</label>
+					<input id="photoShootTraits">
+					
+					<label for="photoShootSource">Photoshoot Source</label>
+					<input id="photoShootSource">
+					
+					<label for="photoShootModder">Photoshoot Modder</label>
+					<input id="photoShootModder">
+					
+					<label for="photoShootCost">Photoshoot Cost</label>
+					<input id="photoShootCost" type="number">
+					
+					<label for="photoShootDesc">Photoshoot Description</label>
+					<textarea id="photoShootDesc"></textarea>
+					
+					<button id="photoShootSaveBtn" class="importantButt w-100">Save</button>
+				</div>
+			</div>
+			<div class="frame" id="VidsSection">
+				<div id="vidzDiv" class="imgGrid"></div>
+			</div>
+		</div>
+		
+		<div class="overlay absolute-center hidden" id="overlay"></div>
+		<div class="absolute-center modal hidden" id="photoshootEditModal">
+			<div class="modal-header" id="modalTitle">Editing photo</div>
+			<div class="modal-body h-100">
+				<div class="col-5 h-100">
+					<img id="imgPreview"/>
+				</div>
+				<div class="col-5 modalForm">
+				
+					<label for="checkco">Cover</label>
+					<input type="checkbox" id="checkco"/>
+					<hr>
+					
+					<label for="phototype">Photo type</label>
+					<select id="phototype">
+						<option value="t0">Clothed</option>
+						<option value="t1">Lacks upper/lower</option>
+						<option value="t2">Underwear/Swimsuit</option>
+						<option value="t22">Transparent/sexy clothing</option>
+						<option value="t3">Nude</option>
+						<option value="t4">Softcore (Masturbation/Spreading...)</option>
+						<option value="t5">Sex</option>
+						<option value="t6">Hardcore</option>
+					</select>
+					<hr>
+					
+					<label for="checktl">Topless</label>
+					<input type="checkbox" id="checktl"/>
+					<br>
+					<label for="checkbl">Bottomless</label>
+					<input type="checkbox" id="checkbl"/>
+					<br>
+					<label for="checkfl">Faceless</label>
+					<input type="checkbox" id="checkfl"/>
+					<br>
+					<label for="checkcl">Closeup</label>
+					<input type="checkbox" id="checkcl"/>
+					
+					<fieldset>
+						<legend>Orientation : </legend>
+						<div>
+						  <input type="radio" id="hz" name="orientation" value="hz">
+						  <label for="hz">Horizontal</label>
+						</div>
+
+						<div>
+						  <input type="radio" id="vz" name="orientation" value="vz">
+						  <label for="vz">Vertical</label>
+						</div>
+					</fieldset>
+					
+					<input id="photoName" class="hidden"/>
+					<input id="photoNumber" class="hidden"/>
+				</div>
+			</div>
+			<div class="modal-footer center">
+				<button id="photoSaveBtn" class="importantButt">Save</button>
+				<button id="photoCancelBtn" class="importantButt">Cancel</button>
+			</div>
+		</div>
+		
+		<div class="absolute-center modal hidden" id="helpModal">
+			<div class="modal-header">How to use the Awesome WTM Editor ?</div>
+			<div class="modal-body">
+				<p>This tool goal is to help modders to easily create and update girl packs. It manages folders creation, .ini files and image converting.</p>
+				<p>It does'nt allows event management yet. It will come in future update.</p>
+				<br>
+				<p>Here's a detailed pack creation procedure :</p>
+				<ul>
+					<li>Type the folder's name. If it exists, press <b>Load</b>, its contents will be loaded. If not, you can click <b>Create</b> and all the base folders will be generated.</li>
+					<li>Fill the GirlInfo Form with the desired information.</li>
+					<li>When a picture has a <span class="red">red outline</span>, it means that the img format is not WEBP or WEBM. Click on it and the <b>Awesome WTM Editor</b> will convert it for you.</li>
+					<li>BEWARE, the gif to webm conversion takes a few seconds, don't click multiples times on a <span class="red">red</span> gif to convert it because it will make the app crash.</li>
+					<li>The photoshoot tab allows you to manage alls the photos. Click on a photo to update its characteristics. The img will be renamed based on your choices. Sometimes, re-editing the same photo is a bit buggy. You can refresh the page if you see a strange behaviour</li>
+				</ul>
+			</div>
+			<div class="modal-footer">
+				<button class="w-100" id="closeHelpButt">OK</button>
+			</div>
+		</div>
+		
+		<script src="wtmEditor.js"></script>
+	</body>
+</html>

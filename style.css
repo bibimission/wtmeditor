@@ -1,0 +1,179 @@
+body{
+	background: rgb(63,94,251);
+	background: radial-gradient(circle, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%);
+	color: white;
+}
+img, video{
+	max-width: 100%;
+	max-height: 100%;
+}
+button{
+	background-color: #5a0091; /* Green */
+	border: none;
+	color: white;
+	padding: 15px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	border-radius: 1vh;
+	transition: ease all 0.3s;
+}
+button:hover{
+	background-color: #ae29ff;
+}
+.importantButt{
+	background-color: #e619c4;
+	outline: 2px solid #f777e2;
+}
+h1{
+	font-size: 4vh;
+}
+input, select, textarea{
+	width: 100%;
+	padding: 12px 20px;
+	margin: 8px 0;
+	display: inline-block;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+input[type='checkbox'], input[type='radio']{
+	width: auto;
+}
+label{
+	font-family: "Luckiest Guy", cursive;
+	font-size: 2vh;
+}
+.center{
+	text-align: center;
+}
+.superfont{
+	font-family: "Luckiest Guy", cursive;
+	text-transform: uppercase;
+	color: white !important;
+	text-shadow: 0 0.1em 20px rgba(0, 0, 0, 1), 0.05em -0.03em 0 rgba(0, 0, 0, 1),
+    0.05em 0.005em 0 rgba(0, 0, 0, 1), 0em 0.08em 0 rgba(0, 0, 0, 1),
+    0.05em 0.08em 0 rgba(0, 0, 0, 1), 0px -0.03em 0 rgba(0, 0, 0, 1),
+    -0.03em -0.03em 0 rgba(0, 0, 0, 1), -0.03em 0.08em 0 rgba(0, 0, 0, 1), -0.03em 0 0 rgba(0, 0, 0, 1);
+}
+.firstHead{
+	border: solid 2px white;
+	padding : 2vh 3vw;
+}
+.menu{
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	grid-column-gap : 5px;
+	margin :2vh 3vw;
+}
+#content{
+	padding: 2vh 5vw;
+}
+.h-100{
+	max-height: 100%;
+}
+.w-100{
+	width: 100%;
+}
+.col-5{
+	display: inline-block;
+	vertical-align: top;
+	width: 48%;
+}
+.absolute-center{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom:0;
+	margin: auto;
+}
+.hidden{
+	display : none !important;
+}
+
+.imgGrid{
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+}
+img.invalid{
+	outline: solid red 2px;
+	position: relative;
+}
+.overlay{
+	background-color: black;
+	opacity: 0.5;
+	height: 100vh;
+	width: 100vw;
+	transition: all ease 0.5s;
+	position: fixed;
+}
+.overlay.hidden{
+	display: block;
+	opacity: 0;
+	pointer-events: none;
+}
+.modal{
+	width: 70%;
+	height: 90%;
+	background-color: #3d1a54;
+	transition: all ease 0.5s;
+	position: fixed;
+}
+.modal-body{
+	padding: 1vh 1vw;
+}
+.modal-body img{
+	max-height: 80vh;
+}
+.modal-footer{
+	text-align:center;
+	margin: 2vh 0;
+}
+.modal-header{
+	text-align: center;
+	background-color: #2e2236;
+	font-size : 3vh;
+	padding: 2vh 0;
+}
+.modal.hidden{
+	display: block;
+	transform: translateY(-200%);
+}
+.modalForm{
+	padding: 2vh 1vw;
+}
+.tabList{
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+}
+.tabButton{
+	display: inline-block;
+	background-color: #733bdb;
+	border: none;
+	color: white;
+	padding: 15px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	border-radius: 1vh;
+	transition: ease all 0.3s;
+}
+.tabButton:hover{
+	background-color: #a77ef2;
+}
+#photoshootForm{
+	background-color: rgba(0,0,0,0.2);
+	padding: 2vh 2vw;
+}
+.helpbutt{
+	position: fixed;
+	right : 0;
+	top : 0;
+	border-radius: 100%;
+}
+.red{
+	color: red;
+}
