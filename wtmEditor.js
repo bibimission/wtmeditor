@@ -485,6 +485,10 @@ function displayEventSection(){
 							imgEl.src = fp.split(".")[0]+".webp";
 						});
 					};
+				}else{
+					imgEl.onclick = function(){
+						navigator.clipboard.writeText(imgEl.title);
+					};
 				}
 				imgDiv.appendChild(imgEl);
 			}else{
@@ -493,6 +497,9 @@ function displayEventSection(){
 				imgEl.loop = true;
 				imgEl.src = fp;
 				imgEl.title = fp.split("/").slice(-1);
+				imgEl.onclick = function(){
+					navigator.clipboard.writeText(imgEl.title);
+				};
 				imgDiv.appendChild(imgEl);
 			}
 		});
