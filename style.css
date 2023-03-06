@@ -101,6 +101,10 @@ img.invalid{
 	outline: solid red 2px;
 	position: relative;
 }
+img.busy{
+	pointer-events: none;
+	opacity: 0.5;
+}
 .overlay{
 	background-color: black;
 	opacity: 0.5;
@@ -176,4 +180,7 @@ img.invalid{
 }
 .red{
 	color: red;
+}
+#vidTags{
+	height : 50vh;
 }

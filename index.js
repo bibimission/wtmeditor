@@ -54,6 +54,7 @@ app.post('/readFolder/:path',function(req,res){
 
 app.post('/convertToWebm/:path',function(req,res){
 	var url = parseUrl(req.params.path);
+	console.log("Converting "+url+" to WEBM");
 	try {
 		convertGifToWebm(url, function(){
 			res.json({ success : true });

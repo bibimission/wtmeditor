@@ -22,6 +22,7 @@ document.getElementById("createButt").onclick = function(){
 document.getElementById("photoSaveBtn").onclick = savePhotoInformation;
 document.getElementById("photoCancelBtn").onclick = closeModal;
 document.getElementById("photoShootSaveBtn").onclick = savePhotoshootInfo;
+document.getElementById("videoSaveButt").onclick = saveVideoInfo;
 
 document.getElementById("closeHelpButt").onclick = function(){
 	showHelpModal(false);
@@ -168,25 +169,82 @@ function displayVidsSection(){
 			var gifEl = document.createElement('img');
 			gifEl.classList.add("invalid");
 			gifEl.src = fp;
-			gifEl.onclick = function(){
-				convertToWebm(fp, function(d){
-					gifEl.classList.add("hidden");
-					var vidEl = document.createElement("video");
-					vidEl.autoplay = true;
-					vidEl.loop = true;
-					vidEl.src = fp.split(".")[0]+".webm";
-					vidsDiv.appendChild(vidEl);
-				});
-			};
+			gifEl.title = fp;
+			if(fp.split(".")[1] == "gif"){
+				gifEl.onclick = function(){
+					gifEl.classList.add("busy");
+					convertToWebm(gifEl.title, function(d){
+						gifEl.classList.add("hidden");
+						var vidEl = document.createElement("video");
+						vidEl.autoplay = true;
+						vidEl.loop = true;
+						vidEl.src = gifEl.title.split(".")[0]+".webm";
+						vidsDiv.appendChild(vidEl);
+					});
+				};
+			}
 			vidsDiv.appendChild(gifEl);
 		}else{
 			var imgEl = document.createElement("video");
 			imgEl.autoplay = true;
 			imgEl.loop = true;
 			imgEl.src = fp;
+			imgEl.onclick = function(){
+				photoInEdit = imgEl;
+				showEditVidModal();
+			};
 			vidsDiv.appendChild(imgEl);
 		}
 	});
+}
+
+function showEditVidModal(){
+	document.getElementById("vidPreview").src=photoInEdit.src;
+	var tokens = photoInEdit.src.split("/").slice(-1)[0].split("_");
+	for(var o of document.getElementById("vidtype").options){
+		if(tokens.includes(o.value)){
+			o.selected = true;
+		}
+	}
+	for(var o of document.getElementById("vidTags").options){
+		if(tokens.includes(o.value)){
+			o.selected = true;
+		}
+	}
+	document.getElementById("overlay").classList.remove("hidden");
+	document.getElementById("videdit").classList.remove("hidden");
+}
+function saveVideoInfo(){
+	var title = document.getElementById("vidtype").value;
+	var tags = getSelectValues(document.getElementById("vidTags"));
+	var finalTitle = title+"_"+tags.join("_")+"_"+(Math.floor(Math.random() * 2000))+".webm";
+	
+	var tokens = photoInEdit.src.split("/");
+	var basePath = pathInput.value + "/vids/"+tokens[tokens.length -1];
+	var finalPath = pathInput.value + "/vids/"+finalTitle;
+	console.log(photoInEdit.src);
+	console.log(finalPath);
+	renameFile(basePath, finalPath, function(){
+		photoInEdit.src = finalPath;
+		photoInEdit = null;
+	});
+	document.getElementById("overlay").classList.add("hidden");
+	document.getElementById("videdit").classList.add("hidden");
+}
+
+function getSelectValues(select) {
+  var result = [];
+  var options = select && select.options;
+  var opt;
+
+  for (var i=0, iLen=options.length; i<iLen; i++) {
+    opt = options[i];
+
+    if (opt.selected) {
+      result.push(opt.value);
+    }
+  }
+  return result;
 }
 
 function displayPhotoshootSection(){
