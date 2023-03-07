@@ -3,6 +3,7 @@ var files = [];
 var photoInEdit = null;
 var currentPhotoshootTab = "";
 var currentEventTab = "";
+var currentEventElements = [];
 document.getElementById("loadButt").onclick = function(){
 	var lePath = pathInput.value;
 	getFiles(lePath, function(data){
@@ -31,6 +32,9 @@ document.getElementById("helpbutt").onclick = function(){
 	showHelpModal(true);
 };
 document.getElementById("eventSaveButt").onclick = saveEventInformation;
+document.getElementById("eventElementAddBtn").onclick = function(){
+	addEventElement();
+};
 
 /*
 sendPostRequest("convertGif", "masturb.gif", function(d){
@@ -508,6 +512,17 @@ function displayEventSection(){
 				}
 			});
 			
+			// Rpy file
+			console.log("Getting rpy");
+			getFile(pathInput.value+"/events/"+currentEventTab+"/"+currentEventTab+".rpy", function(d){
+				if(!d.success){
+					console.log("Pas trouvé !");
+					currentEventElements = [];
+				}else{
+					console.log("Trouvé !");
+					fillEventSection(d.file);
+				}
+			});
 		};
 		eventList.appendChild(folderButton);
 		
@@ -517,7 +532,7 @@ function displayEventSection(){
 		imgDiv.classList.add("hidden");
 		imgDiv.id=f.split("/").slice(-1)+"_tab";
 		
-		var photos = files.filter(p => p.split(f).length > 1 && p != f && p.split(".")[1] != "ini");
+		var photos = files.filter(p => p.split(f).length > 1 && p != f && p.split(".")[1] != "ini" && p.split(".")[1] != "rpy" && p.split(".")[1] != "rpyc");
 		photos.forEach(function(fp){
 			if(fp.split(".")[1] != "webm"){
 				var imgEl = document.createElement('img');
@@ -597,10 +612,128 @@ function saveEventInformation(){
 	iniText += document.getElementById("event_fea").value;
 	iniText += "\n";
 	
+	saveEventRpyFile();
 	
 	setFile(pathInput.value+"/events/"+currentEventTab+"/eventConfig.ini", iniText,function(d){
 		console.log(d);
 	});
+}
+
+function saveEventRpyFile(){
+	console.log(currentEventElements);
+	var fourSpaces = "    ";
+	var rpyText = "";
+	rpyText += "label "+document.getElementById("event_label").value+":\n";
+	currentEventElements.forEach(function(e,i){
+		var domEl = document.getElementById("element"+i);
+		console.log(domEl);
+		if(domEl.classList.contains("hidden")){
+			return;
+		}
+		e.type = document.querySelector("#element"+i+" #elementType").value;
+		e.value = document.querySelector("#element"+i+" #elementText").value;
+		switch(e.type){
+			case "narr":
+			rpyText += fourSpaces + "\""+e.value+"\"\n";
+			break;
+			case "pldi":
+			rpyText += fourSpaces + "player \""+e.value+"\"\n";
+			break;
+			case "gidi":
+			rpyText += fourSpaces + "event_girl \""+e.value+"\"\n";
+			break;
+			case "img":
+			rpyText += fourSpaces + "$selectedEvent.setImg(\""+e.value+"\")\n";
+			break;
+			case "imge":
+			rpyText += fourSpaces + "$selectedEvent.setImg()\n";
+			break;
+			case "vid":
+			rpyText += fourSpaces + "$selectedEvent.setVid(\""+e.value+"\")\n";
+			break;
+			case "vide":
+			rpyText += fourSpaces + "$selectedEvent.setVid()\n";
+			break;
+			case "back":
+			rpyText += fourSpaces + "$selectedEvent.setBackground(\""+e.value+"\")\n";
+			break;
+		}
+	});
+	rpyText += fourSpaces + "jump eventend\n";
+	console.log(rpyText);
+	setFile(pathInput.value+"/events/"+currentEventTab+"/"+currentEventTab+".rpy", rpyText,function(d){
+		console.log(d);
+	});
+}
+
+function fillEventSection(file){
+	var elementDiv = document.getElementById("eventContents");
+	elementDiv.innerHTML = "";
+	var lines = file.split("\n");
+	lines.forEach(function(l){
+		var tokens = l.trim().split(" ");
+		if(tokens[0] == "label" || tokens[0].charAt(0) == "#"){
+			return;
+		}
+		var el = {type: "narr", value:""};
+		if(tokens[0] == "player"){
+			el.type = "pldl";
+			var texte = tokens.slice(1, tokens.length).join(" ");
+			el.value = texte.substring(1, texte.length -1);
+		}else if(tokens[0] == "event_girl"){
+			el.type = "gidi";
+			var texte = tokens.slice(1, tokens.length).join(" ");
+			el.value = texte.substring(1, texte.length -1);
+		}else if(tokens[0].charAt(0) == '"'){
+			el.type = "narr";
+			var texte = tokens.slice(1, tokens.length).join(" ");
+			el.value = texte.substring(1, texte.length -1);
+		}else if(tokens[0] == "$selectedEvent.setImg()"){
+			el.type = "imge";
+		}else if(tokens[0] == "$selectedEvent.setVid()"){
+			el.type = "vide";
+		}else if(tokens[0].includes("$selectedEvent.setBackground")){
+			el.type = "back";
+			el.value = tokens[0].split('"')[1];
+		}else if(tokens[0].includes("$selectedEvent.setImg")){
+			el.type = "img";
+			el.value = tokens[0].split('"')[1];
+		}else if(tokens[0].includes("$selectedEvent.setVid")){
+			el.type = "vid";
+			el.value = tokens[0].split('"')[1];
+		}else{
+			return;
+		}
+		addEventElement(el,currentEventElements.length);
+		currentEventElements.push(el);
+	});
+	console.log(currentEventElements);
+}
+
+function addEventElement(el = null, index=-1){
+	var elementDiv = document.getElementById("eventContents");
+	var template = document.getElementById("eventElementTemplate");
+	var clone = document.importNode(template.content,true);
+	if(index == -1){
+		index = currentEventElements.length;
+	}
+	var id = "element"+index;
+	if(el != null){
+		console.log(el);
+	}else{
+		el = {type:"narr", value:""};
+		currentEventElements.push(el);
+	}
+	clone.getElementById("element").id = id;
+	clone.getElementById("supprBtn").name = id;
+	clone.getElementById("elementType").name = id;
+	clone.getElementById("elementText").name = id;
+	clone.getElementById("supprBtn").onclick = function(){
+		document.getElementById(this.name).classList.add("hidden");
+	};
+	clone.getElementById("elementType").value = el.type;
+	clone.getElementById("elementText").value = el.value;
+	elementDiv.appendChild(clone);
 }
 
 function closeModal(){

@@ -43,7 +43,6 @@ app.post('/readFolder/:path',function(req,res){
 			getFileList(url).then((files) => {
 				res.json({ success : true, files : files});
 			});
-			
 		}else{
 			res.json({ success : false});
 		}
@@ -103,11 +102,11 @@ app.get('/createFolder/:path',function(req,res){
 
 app.get('/getFile/:path',function(req,res){
 	var url = parseUrl(req.params.path);
+	console.log("Getting file"+url);
 	try {
 		readFile(url, function(d){
 			res.json({ success : true, file : d });
 		});
-		
 	} catch (err) {
 		console.log(err);
 		res.json({ success : false});
@@ -143,14 +142,19 @@ function convertGifToWebm(imagePath, callback){
 }
 
 function readFile(filePath, callback){
-	fs.readFile(filePath, function(err,data){
-		if (!err) {
-			var ret = Buffer.from(data);
-			callback(ret.toString());
-		} else {
-			console.log(err);
-		}
-	});
+	try{
+		fs.readFile(filePath, function(err,data){
+			if (!err) {
+				var ret = Buffer.from(data);
+				callback(ret.toString());
+			} else {
+				callback("error");
+			}
+		});
+	} catch (err) {
+		console.log(err);
+		callback("error");
+	}
 }
 function writeFile(filePath,text, callback){
 	fs.writeFileSync(filePath, text, function(err) {

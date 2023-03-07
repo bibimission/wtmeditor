@@ -73,7 +73,7 @@
 				<div id="eventDetail">
 					<div id="event_img"></div>
 				</div>
-				<div id="eventForm" class="hidden">
+				<div id="eventForm" class="hidden col-5">
 					<label for="event_name">Event Name</label>
 					<input type="text" id="event_name"/>
 					
@@ -137,8 +137,13 @@
 						<label for="event_fea">Fear</label>
 						<input type="number" id="event_fea" value=0/>
 					</fieldset>
-					<button class="importantButt w-100" id="eventSaveButt">Save</button>
 				</div>
+				<div class="col-5">
+					<div class="center"><label>Event Content</label></div>
+					<div id="eventContents"></div>
+					<button class="center" id="eventElementAddBtn">Add element</button>
+				</div>
+				<button class="importantButt w-100" id="eventSaveButt">Save</button>
 			</div>
 			<div class="frame" id="PhotoshotsSection">
 				<div id="photoshootChoose" class="tabList"></div>
@@ -319,6 +324,25 @@
 				<button id="videoSaveButt" class="importantButt w-100">Save</button>
 			</div>
 		</div>
+		
+		<template id="eventElementTemplate">
+			<div class="elementRow" id="element">
+				<div id="content">
+					<select id="elementType">
+						<option value="narr">Narration</option>
+						<option value="pldi">Player Dialog</option>
+						<option value="gidi">Girl Dialog</option>
+						<option value="img">Image</option>
+						<option value="imge">Image End</option>
+						<option value="vid">Video Start</option>
+						<option value="vide">Video End</option>
+						<option value="back">Background Image</option>
+					</select>
+				</div>
+				<div class="inputCol"><input type="text" id="elementText"></div>
+				<button id="supprBtn">Suppr</button>
+			</div>
+		</template>
 		
 		<script src="wtmEditor.js"></script>
 	</body>
