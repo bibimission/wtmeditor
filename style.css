@@ -199,3 +199,6 @@ img.busy{
 .elementRow #supprBtn{
 	display: inline-block;
 }
+a{
+	color: lightblue;
+}
