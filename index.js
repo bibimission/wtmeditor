@@ -6,9 +6,12 @@ const ffprobe = require("@ffprobe-installer/ffprobe");
 const webp=require('webp-converter');
 webp.grant_permission();
 
+/*
 const ffmpeg = require("fluent-ffmpeg")()
   .setFfprobePath(ffprobe.path)
   .setFfmpegPath(ffmpegInstaller.path);
+  */
+  
 
 const fs = require('fs')
 const https = require('https');
@@ -62,6 +65,8 @@ app.post('/convertToWebm/:path',function(req,res){
 		console.log(err);
 		res.json({ success : false});
 	}
+	
+	
 });
 
 app.post('/convertToWebp/:path',function(req,res){
@@ -127,18 +132,22 @@ app.post('/setFile/:path',function(req,res){
 });
 
 function convertGifToWebm(imagePath, callback){
+	var ffmpeg = require("fluent-ffmpeg")()
+  .setFfprobePath(ffprobe.path)
+  .setFfmpegPath(ffmpegInstaller.path);
+  
 	ffmpeg
-    .input(imagePath)
+	.input(imagePath)
     .noAudio()
     .outputOptions('-pix_fmt yuv420p')
     .output(imagePath.substring(0,imagePath.length - 3) + "webm")
-    .on("end", () => {
+    .on("end", (e) => {
       console.log("Generated !");
 	  fs.unlinkSync(imagePath);
+	  ffmpeg.kill();
 	  callback();
     })
-    .on("error", (e) => console.log(e))
-    .run();
+    .on("error", (e) => console.log(e)).run();
 }
 
 function readFile(filePath, callback){

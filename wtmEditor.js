@@ -465,6 +465,7 @@ function displayEventSection(){
 			}
 			document.getElementById(f.split("/").slice(-1)+"_tab").classList.remove("hidden");
 			document.getElementById("eventForm").classList.remove("hidden");
+			document.getElementById("eventTruc").classList.remove("hidden");
 			currentEventTab = f.split("/").slice(-1);
 			
 			// Form Info
