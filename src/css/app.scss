@@ -1,0 +1,18 @@
+// app global css in SCSS form
+img, video{
+    max-width: 100%;
+}
+.hidden{
+    display: none;
+}
+.p-relative{
+    position: relative;
+}
+.absolute-center{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left:0;
+    right:0;
+    margin: auto;
+}

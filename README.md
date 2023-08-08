@@ -1,15 +1,41 @@
-### wtmeditor
+# Quasar App (wtmeditor)
 
-# How to use
+Wtm Editor with Vue
 
-Requires NodeJS to work.
-
-install the packages with the command
-
+## Install the dependencies
+```bash
+yarn
+# or
 npm install
+```
 
-Then launch it with
+### Start the app in development mode (hot-code reloading, error reporting, etc.)
+```bash
+quasar dev
+```
 
-node index.js
 
-Finally access it at localhost:8080
+### Lint the files
+```bash
+yarn lint
+# or
+npm run lint
+```
+
+
+### Format the files
+```bash
+yarn format
+# or
+npm run format
+```
+
+
+
+### Build the app for production
+```bash
+quasar build
+```
+
+### Customize the configuration
+See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
