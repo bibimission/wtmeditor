@@ -136,6 +136,9 @@ class FolderTool{
     renameFile(oldurl, newurl){
         try{
             console.log('renamed ' + oldurl +' into ' + newurl);
+			if(newurl.split(".").length == 1){
+				newurl += ".webp";
+			}
             fs.rename( oldurl, newurl, function(e){
                 console.log(e)
             });
