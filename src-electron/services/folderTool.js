@@ -64,6 +64,7 @@ class FolderTool{
                 fs.mkdirSync(url+"/events");
                 fs.mkdirSync(url+"/photoshoots");
                 fs.mkdirSync(url+"/vids");
+                this.writeGirlInfoFile(girlName, {});
             }
             return true;
         } catch (err) {
@@ -102,6 +103,13 @@ class FolderTool{
     async readFile(filePath){
         return new Promise(async (resolve) => {
             try{
+                if(filePath == null){
+                    resolve("No Such FIle")
+                    return
+                }
+                if (!fs.existsSync(filePath)){
+                    this.writeFile(filePath, '');
+                }
                 fs.readFile(filePath, function(err,data){
                     if (!err) {
                         var ret = Buffer.from(data);
