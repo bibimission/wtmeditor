@@ -80,6 +80,9 @@ ipcMain.handle('img:convert:webp', async (e, data) => {
 ipcMain.handle('img:convert:webm', async (e, data) => {
   return await ImageTool.convertGifToWebm(data.img)
 })
+ipcMain.handle('img:remove-bg', async(e, data) => {
+  return await ImageTool.removeImageBackground(data.img)
+})
 ipcMain.handle('webm:resize', async (e, data) => {
   return await ImageTool.resizeWebm(data.img)
 })

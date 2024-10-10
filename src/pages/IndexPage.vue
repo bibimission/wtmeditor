@@ -9,7 +9,8 @@
       <div class="tabHead">
         <q-tabs v-model="tab" class="text-teal">
           <q-tab name="infos" icon="info" label="Infos" />
-          <q-tab name="bodyparts" icon="woman" label="Bodyparts" />
+          <q-tab name="bodyparts" icon="person" label="Bodyparts" />
+          <q-tab name="fullbody" icon="woman" label="Fullbody" />
           <q-tab name="events" icon="event" label="Events" />
           <q-tab name="photoshoots" icon="photo" label="Photoshoots" />
           <q-tab name="vids" icon="movie" label="Videos" />
@@ -24,6 +25,10 @@
 
         <q-tab-panel name="bodyparts">
           <BodyPartsSection :photos="bodyPhotos" :folderPath="folderPath" @change="loadFolder"></BodyPartsSection>
+        </q-tab-panel>
+
+        <q-tab-panel name="fullbody">
+          <FullBodySection :files="fullbodyFiles" @change="loadFolder"></FullBodySection>
         </q-tab-panel>
 
         <q-tab-panel name="events">
@@ -49,6 +54,7 @@ import BodyPartsSection from 'src/components/BodyPartsSection.vue'
 import VideosSection from 'src/components/VideosSection.vue'
 import PhotoshootSection from 'src/components/PhotoshootSection.vue'
 import EventSection from 'src/components/EventSection.vue'
+import FullBodySection from 'src/components/FullBodySection.vue'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -57,7 +63,8 @@ export default defineComponent({
     BodyPartsSection,
     VideosSection,
     PhotoshootSection,
-    EventSection
+    EventSection,
+    FullBodySection
   },
   setup() {
     return {
@@ -78,7 +85,8 @@ export default defineComponent({
       bodyPhotos: [],
       videos: [],
       photoshootFiles: [],
-      eventFiles: []
+      eventFiles: [],
+      fullbodyFiles: []
     }
   },
   methods: {
@@ -94,6 +102,7 @@ export default defineComponent({
         this.videos = data.files.filter(f => f.split('/vids/').length > 1);
         this.photoshootFiles = data.files.filter(f => f.split('/photoshoots/').length > 1);
         this.eventFiles = data.files.filter(f => f.split('/events/').length > 1);
+        this.fullbodyFiles = data.files.filter(f => f.split('/fullbodies/').length > 1);
       });
     },
     createFolder() {

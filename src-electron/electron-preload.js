@@ -49,6 +49,7 @@ const ipc = {
             'folder:create',
             'file:read',
             'img:convert:webp',
+            'img:remove-bg',
             'img:convert:webm',
             'img:getFrames',
             'webm:resize'

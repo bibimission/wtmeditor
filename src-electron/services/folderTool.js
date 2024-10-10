@@ -23,6 +23,7 @@ class FolderTool{
             iniText += "[info]\n";
             iniText += "source = " + parsedGirl.source+"\n";
             iniText += "modder = " + parsedGirl.modder+"\n";
+            iniText += "dl_links = " + parsedGirl.dl_links+"\n";
             iniText += "[vars]\n";
             iniText += "sensitiveArea = " + parsedGirl.sensitive_area+"\n";
             this.writeFile(GIRLS_BASE_PATH + "/" + girlName + "/girlConfig.ini",iniText);
@@ -51,6 +52,9 @@ class FolderTool{
             if(l.split("sensitiveArea").length > 1){
                 girlObject.sensitive_area = l.split("sensitiveArea")[1].trim().substring(1).trim();
             }
+            if(l.split("dl_links").length > 1){
+                girlObject.dl_links = l.split("dl_links")[1].trim().substring(1).trim();
+            }
         });
         return girlObject;
     }
@@ -63,6 +67,7 @@ class FolderTool{
                 fs.mkdirSync(url+"/bodyparts");
                 fs.mkdirSync(url+"/events");
                 fs.mkdirSync(url+"/photoshoots");
+                fs.mkdirSync(url+"/fullbodies");
                 fs.mkdirSync(url+"/vids");
                 this.writeGirlInfoFile(girlName, {});
             }

@@ -1,7 +1,7 @@
 <template>
-    <div @click="imageClick" :class="{ 'wrong': computeNeedConversion }" class="p-relative">
-        <img :src="computeSrc" v-if="computeMediaType == 'img'">
-        <video :src="computeSrc" :class="{ 'tiny': isTiny }" v-if="computeMediaType == 'video'" muted @mouseover="onHover($event)" ref="videoPlayer" @loadeddata="onLoad($event)"></video>
+    <div @click="imageClick($event)" :class="{ 'wrong': computeNeedConversion }" class="p-relative">
+        <img :src="computeSrc" v-if="computeMediaType == 'img'" loading="lazy">
+        <video :src="computeSrc" :class="{ 'tiny': isTiny }" v-if="computeMediaType == 'video'" muted @mouseover="onHover($event)" ref="videoPlayer" @loadeddata="onLoad($event)" loading="lazy"></video>
         <div class="overlay absolute-center" :class="{ 'hidden': !isConverting }">
             <q-spinner class="absolute-center" color="white" size="3em" />
         </div>
@@ -36,7 +36,7 @@ export default defineComponent({
         this.realSrc = this.src;
     },
     methods: {
-        imageClick() {
+        imageClick(e) {
             if (!this.isConverting && this.computeNeedConversion) {
                 this.isConverting = true;
                 var type = this.computeMediaType;
@@ -68,6 +68,14 @@ export default defineComponent({
             } else if (this.isTiny) {
                 this.isConverting = true;
                 window.ipcRenderer.invoke('webm:resize', { img: this.realSrc }).then((newPath) => {
+                    if (newPath) {
+                        this.realSrc = newPath;
+                    }
+                    this.isConverting = false;
+                });
+            } else if (e.ctrlKey) {
+                console.log('remove BG')
+                window.ipcRenderer.invoke('img:remove-bg', { img: this.realSrc }).then((newPath) => {
                     if (newPath) {
                         this.realSrc = newPath;
                     }

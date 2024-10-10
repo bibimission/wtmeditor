@@ -7,6 +7,7 @@ const WebpImage = require('node-webpmux').Image;
 const child = require('child_process')
 const path = require('path')
 const util = require('util')
+import { removeBackground } from "@imgly/background-removal-node";
 
 const terminateWithError = (error = '[fatal] error') => {
 	console.log(error)
@@ -156,6 +157,27 @@ class ImageTool{
                     fs.rmdirSync(frames, { recursive: true })
                 })
         });
+    }
+
+    static async removeImageBackground(imgSource) {
+        try {
+            console.log('Removing BG')
+            const imageBuffer = fs.readFileSync(imgSource);
+            const blob = new Blob([imageBuffer], { type: "image/png" });
+            var newName = imgSource.split('.')[0]+'.png';
+            return new Promise((resolve) => {
+                removeBackground(blob).then(async(blob2) => {
+                    console.log('BG removed')
+                    const buffer = Buffer.from(await blob2.arrayBuffer());
+                    fs.writeFileSync(newName, buffer);
+                    console.log('Saved to '+newName)
+                    fs.unlinkSync(imgSource)
+                    resolve(newName);
+                })
+            })
+        } catch (e) {
+            return e.message
+        }
     }
 }
 export default ImageTool;

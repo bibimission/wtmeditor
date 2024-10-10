@@ -26,7 +26,7 @@ export default defineComponent({
     data: function(){
         return {
             videoInEdit: -1,
-            videoTypeOptions : ['creampie_anal','creampie_pussy','facial','fingerass','fingerpussy','fuckass','fuckpussy','gropeass','gropeboob','innerthigh','kissing','lickpussy','orgasm','pinch','remove_hotpants','remove_bra','remove_panty','remove_skirt','remove_top','remove_leggins','remove_jeans','remove_socks','slapass','slapboobs','spank','strip','teaseass','teaseclit','useface','wedgie'],
+            videoTypeOptions : ['creampie_anal','creampie_pussy','facial','fingerass','fingerpussy','fuckass','fuckpussy','gropeass','gropeboob','innerthigh','kissing','lickpussy','orgasm','pinch','remove_hotpants','remove_bra','remove_panty','remove_skirt','remove_top','remove_leggins','remove_jeans','remove_socks','slapass','slapboobs','spank','strip','teaseass','teaseclit','useface','wedgie','masturbation'],
             selectedVideoType : '',
             videoTagsOptions : ['clothed', 'notop','nobot','panty','nopanty','bra','nobra','socks','shirt','skirt','jeans','leggins','hotpants','dress','shorts', 'blondehair','mother'],
             selectedVideoTags : [],
