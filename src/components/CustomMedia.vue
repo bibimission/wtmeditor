@@ -98,7 +98,7 @@ export default defineComponent({
             }
         },
         onLoad(e) {
-            this.isTiny = e.target.videoWidth < 400;
+            this.isTiny = e.target.videoWidth < 600;
         }
     },
     computed: {

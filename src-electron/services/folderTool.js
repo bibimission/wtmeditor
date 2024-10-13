@@ -68,6 +68,7 @@ class FolderTool{
                 fs.mkdirSync(url+"/events");
                 fs.mkdirSync(url+"/photoshoots");
                 fs.mkdirSync(url+"/fullbodies");
+                fs.mkdirSync(url+"/plannedEvents");
                 fs.mkdirSync(url+"/vids");
                 this.writeGirlInfoFile(girlName, {});
             }

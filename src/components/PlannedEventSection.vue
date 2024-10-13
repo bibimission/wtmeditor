@@ -17,25 +17,21 @@
         </div>
         <q-btn @click="addElement">Add</q-btn>
     </div>
-    <fieldset class="eventForm col" v-if="currentEvent != ''">
+    <fieldset class="eventForm col text-black" v-if="currentEvent != ''">
         <legend>Event Info</legend>
-        <q-input v-model="eventName" @change="onInfoChange" label="Name"></q-input>
-        <q-input v-model="eventLabel" @change="onInfoChange" label="Label"></q-input>
-        <!--<q-input v-model="eventOccurence" @change="onInfoChange" type="number" label="Occurence"></q-input>-->
-        <!--<q-input v-model="eventCooldown" @change="onInfoChange" type="number" label="Cooldown"></q-input>-->
+        <q-input v-model="eventLabel" @change="onElementChange" label="Label"></q-input>
+        <q-input v-model="eventCooldown" @change="onElementChange" type="number" label="Cooldown"></q-input>
 
-        <q-select @update:model-value="onInfoChange" v-model="eventDays" label="Days" multiple :options="daysOptions" use-input use-chips input-debounce="0"></q-select>
-        <q-input v-model="eventSource" @change="onInfoChange" label="Source"></q-input>
-        <q-input v-model="eventModder" @change="onInfoChange" label="Modder"></q-input>
         <fieldset>
-            <legend>Requirement</legend>
-            <q-input v-model="eventStats.intellect" @change="onInfoChange" type="number" label="Intellect"></q-input>
-            <q-input v-model="eventStats.naturism" @change="onInfoChange" type="number" label="Naturism"></q-input>
-            <q-input v-model="eventStats.affection" @change="onInfoChange" type="number" label="Affection"></q-input>
-            <q-input v-model="eventStats.corruption" @change="onInfoChange" type="number" label="Corruption"></q-input>
-            <q-input v-model="eventStats.discipline" @change="onInfoChange" type="number" label="Discipline"></q-input>
-            <q-input v-model="eventStats.fear" @change="onInfoChange" type="number" label="Fear"></q-input>
+            <q-input v-model="otherGirls" label="Other girls (separated with ,)" @change="onElementChange"></q-input>
+            <q-select class=" " @update:model-value="onElementChange" :options="placeChoices" label="Place" v-model="eventPlace"></q-select>
+            <q-input type="number" v-model="hourStart" label="Hour Start" min="1" max="23" @change="onElementChange"></q-input>
+            <q-input type="number" v-model="hourEnd" label="Hour End" min="1" max="23" @change="onElementChange"></q-input>
+            <q-input type="number" v-model="eventChance" step="0.1" label="Chance percentage" min="0" max="1" @change="onElementChange"></q-input>
         </fieldset>
+
+        <q-select @update:model-value="onElementChange" v-model="eventDays" label="Days" multiple :options="daysOptions"></q-select>
+
     </fieldset>
     <div class="imgGrid">
         <CustomMedia v-for="img, index in computeCurrentPhotos" :key="index" :src="img"></CustomMedia>
@@ -69,21 +65,9 @@ export default defineComponent({
                 { label: 'Sunday', value: '7' }
             ],
 
-            eventName: '',
             eventLabel: '',
-            eventOccurence: 1,
             eventCooldown: 1,
             eventDays: [],
-            eventSource: '',
-            eventModder: '',
-            eventStats: {
-                intellect: 0,
-                naturism: 0,
-                affection: 0,
-                corruption: 0,
-                discipline: 0,
-                fear: 0
-            },
 
             eventElements: [],
             elementTypes: [
@@ -97,83 +81,32 @@ export default defineComponent({
                 'Background',
                 'Show Phone',
                 'Hide Phone',
-            ]
+            ],
+            otherGirls: '',
+            placeChoices: [
+                { label: 'Home', value: 'home' },
+                { label: 'Academy Hall', value: 'academyhall' },
+                { label: 'On the way to school', value: 'gotoschool' },
+                { label: 'On the way back Home', value: 'lb_academyhall_home' },
+            ],
+            hourStart: 0,
+            hourEnd: 0,
+            eventPlace: null,
+            eventChance: 0,
+            eventConditions: [],
+            conditionChoices: []
+
         }
     },
     methods: {
         selectEvent(e, event) {
             this.currentEvent = event;
-            this.loadEventInfos();
             this.loadEventElements();
-        },
-        loadEventInfos() {
-            window.ipcRenderer.invoke('file:read', { path: this.currentEvent + "/eventConfig.ini" }).then((content) => {
-                var lines = content.split("\n");
-                lines.forEach(l => {
-                    if (l.split("event_name =").length > 1) {
-                        this.eventName = l.split("event_name")[1].trim().substring(1).trim();
-                    }
-                    if (l.split("event_label =").length > 1) {
-                        this.eventLabel = l.split("event_label")[1].trim().substring(1).trim();
-                    }
-                    if (l.split("event_occurence =").length > 1) {
-                        this.eventOccurence = parseInt(l.split("event_occurence")[1].trim().substring(1).trim(), 10);
-                    }
-                    if (l.split("event_cooldown =").length > 1) {
-                        this.eventCooldown = parseInt(l.split("event_cooldown")[1].trim().substring(1).trim(), 10);
-                    }
-                    if (l.split("allowedDays =").length > 1) {
-                        this.eventDays = this.daysOptions.filter(d => l.split("allowedDays")[1].trim().substring(1).trim().split(',').includes(d.value));
-                    }
-                    if (l.split("source =").length > 1) {
-                        this.eventSource = l.split("source")[1].trim().substring(1).trim();
-                    }
-                    if (l.split("modder =").length > 1) {
-                        this.eventModder = l.split("modder")[1].trim().substring(1).trim();
-                    }
-                    if (l.split("stats_inacdf =").length > 1) {
-                        var toks = l.split("stats_inacdf")[1].trim().substring(1).trim().split(',');
-                        this.eventStats.intellect = parseInt(toks[0]);
-                        this.eventStats.naturism = parseInt(toks[1]);
-                        this.eventStats.affection = parseInt(toks[2]);
-                        this.eventStats.corruption = parseInt(toks[3]);
-                        this.eventStats.discipline = parseInt(toks[4]);
-                        this.eventStats.fear = parseInt(toks[5]);
-                    }
-                });
-            });
         },
         loadEventElements() {
             window.ipcRenderer.invoke('file:read', { path: this.computeCurrentEventFile }).then((content) => {
                 this.eventElements = this.parseEventElements(content.split("\n"));
             })
-        },
-        onInfoChange() {
-            setTimeout(() => {
-                var iniText = "[info]\n";
-                iniText += "event_name = " + this.eventName + "\n";
-                iniText += "event_label = " + this.eventLabel + "\n";
-                iniText += "occurence = " + this.eventOccurence + "\n";
-                iniText += "cooldown = " + this.eventCooldown + "\n";
-
-                iniText += "allowedDays = ";
-                iniText += this.eventDays.map(e => e.value).join(',');
-                iniText += "\n";
-
-                iniText += "source = " + this.eventSource + "\n";
-                iniText += "modder = " + this.eventModder + "\n";
-
-                iniText += "[requirements]\n";
-
-                iniText += "stats_inacdf = " + this.eventStats.intellect + ",";
-                iniText += this.eventStats.naturism + ",";
-                iniText += this.eventStats.affection + ",";
-                iniText += this.eventStats.corruption + ",";
-                iniText += this.eventStats.discipline + ",";
-                iniText += this.eventStats.fear;
-                iniText += "\n";
-                window.ipcRenderer.send('file:write', { path: this.currentEvent + "/eventConfig.ini", text: iniText })
-            }, 200);
         },
         onImagePick(e, index) {
             this.eventElements[index].value = e.value;
@@ -181,7 +114,17 @@ export default defineComponent({
         },
         onElementChange() {
             var fourSpaces = "    ";
-            var rpyText = "label " + this.eventLabel + ":\n";
+
+            var rpyText = "init -1 python:\n";
+            console.log(this.eventDays)
+            rpyText += fourSpaces + 'DB_plannedEvents.append(Event("' + this.eventLabel + '", ' + this.eventCooldown + ', _timeFrame = [' + this.hourStart + ',' + this.hourEnd + '], ' +
+                '_girlsNeeded = ["' + this.folderPath + (this.otherGirls == '' ? '' : ',' + this.otherGirls) + '"], ' +
+                '_locations = ["' + this.eventPlace?.value + '"], ' +
+                '_chance = ' + this.eventChance + ', ' +
+                ' _condition = "timeManager.day in [' + this.eventDays.map((d) => { return d.value })?.join(',') + ']"' +
+                '))":\n';
+            rpyText += "\n";
+            rpyText += "label " + this.eventLabel + ":\n";
             this.eventElements.forEach(function (e, i) {
                 switch (e.type) {
                     case "label":
@@ -225,7 +168,7 @@ export default defineComponent({
         },
         parseEventElements(lines) {
             var els = [];
-            lines.forEach(function (l) {
+            lines.forEach((l) => {
                 var tokens = l.trim().split(" ");
                 if (tokens[0].charAt(0) == "#") {
                     return;
@@ -263,7 +206,28 @@ export default defineComponent({
                     el.type = "Show Phone";
                 } else if (tokens[0] == "hide") {
                     el.type = "Hide Phone";
-                } else {
+                } else if (tokens[0].split('DB_plannedEvents').length > 1) {
+                    const params = l.split('Event(')[1].split(', ');
+                    console.log(params)
+                    this.eventLabel = params[0].split('"')[1]
+                    this.eventCooldown = parseInt(params[1], 10);
+                    const timeFrame = params[2].split('[')[1].split(']')[0].split(',');
+                    this.hourStart = parseInt(timeFrame[0], 10);
+                    this.hourEnd = parseInt(timeFrame[1], 10);
+                    this.otherGirls = params[3].split(',').splice(1).join(',');
+                    const eventPlaceVal = params[4].split('"')[1]
+                    if (eventPlaceVal != '') {
+                        this.eventPlace = this.placeChoices.find(p => p.value == eventPlaceVal)
+                    }
+                    this.eventChance = parseFloat(params[5].split('=')[1].trim())
+                    const dayNumbers = params[6]?.split('[')[1]?.split(']')[0]?.split(',').map((el) => { return el == '' ? -1 : parseInt(el, 10) })
+                    dayNumbers.forEach((n) => {
+                        if (n >= 0) {
+                            this.eventDays.push(this.daysOptions.find(d => d.value == n))
+                        }
+                    })
+                }
+                else {
                     return;
                 }
                 if (el.type != undefined) {
@@ -283,8 +247,8 @@ export default defineComponent({
     computed: {
         computeEventsNames() {
             return this.files.filter(function (p) {
-                if (p.includes("/events/")) {
-                    return p.split("/events/")[1].split("/").length == 1;
+                if (p.includes("/plannedEvents/")) {
+                    return p.split("/plannedEvents/")[1].split("/").length == 1;
                 }
                 return false;
             });
@@ -299,13 +263,16 @@ export default defineComponent({
         computeCurrentEventFile() {
             var theF = this.files.find(p => p.split(this.currentEvent).length > 1 && p != this.currentEvent && p.split(".")[1] == "rpy");
             if (theF == null) {
-                theF = './packs/' + this.folderPath + '/events/' + this.eventName + '/' + this.eventName + '.rpy';
+                theF = './packs/' + this.folderPath + '/plannedEvents/' + this.eventLabel + '/' + this.eventLabel + '.rpy';
             }
             return theF;
         },
         computeEventElements() {
             return this.eventElements;
         }
+    },
+    mounted() {
+        console.log('wesh')
     }
 })
 </script>
@@ -316,7 +283,7 @@ export default defineComponent({
 }
 
 .eventForm {
-    width: 20%;
+    width: 30%;
 }
 
 .eventElements {
@@ -346,5 +313,9 @@ export default defineComponent({
 .imgGrid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
+}
+
+.text-black {
+    color: black;
 }
 </style>

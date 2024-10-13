@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="flex">
     <div class="header">
       <div class="loadDiv">
         <q-input v-model="folderPath" label="Girl Name" />
@@ -11,7 +11,8 @@
           <q-tab name="infos" icon="info" label="Infos" />
           <q-tab name="bodyparts" icon="person" label="Bodyparts" />
           <q-tab name="fullbody" icon="woman" label="Fullbody" />
-          <q-tab name="events" icon="event" label="Events" />
+          <q-tab name="events" icon="school" label="Dates" />
+          <q-tab name="plannedEvents" icon="event" label="Events" />
           <q-tab name="photoshoots" icon="photo" label="Photoshoots" />
           <q-tab name="vids" icon="movie" label="Videos" />
         </q-tabs>
@@ -35,6 +36,10 @@
           <EventSection :files="eventFiles" :folderPath="folderPath"></EventSection>
         </q-tab-panel>
 
+        <q-tab-panel name="plannedEvents">
+          <PlannedEventSection :files="plannedEventFiles" :folderPath="folderPath"></PlannedEventSection>
+        </q-tab-panel>
+
         <q-tab-panel name="photoshoots">
           <PhotoshootSection :files="photoshootFiles" @change="loadFolder"></PhotoshootSection>
         </q-tab-panel>
@@ -55,6 +60,7 @@ import VideosSection from 'src/components/VideosSection.vue'
 import PhotoshootSection from 'src/components/PhotoshootSection.vue'
 import EventSection from 'src/components/EventSection.vue'
 import FullBodySection from 'src/components/FullBodySection.vue'
+import PlannedEventSection from 'src/components/PlannedEventSection.vue'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -64,7 +70,8 @@ export default defineComponent({
     VideosSection,
     PhotoshootSection,
     EventSection,
-    FullBodySection
+    FullBodySection,
+    PlannedEventSection
   },
   setup() {
     return {
@@ -86,7 +93,8 @@ export default defineComponent({
       videos: [],
       photoshootFiles: [],
       eventFiles: [],
-      fullbodyFiles: []
+      fullbodyFiles: [],
+      plannedEventFiles: []
     }
   },
   methods: {
@@ -102,6 +110,7 @@ export default defineComponent({
         this.videos = data.files.filter(f => f.split('/vids/').length > 1);
         this.photoshootFiles = data.files.filter(f => f.split('/photoshoots/').length > 1);
         this.eventFiles = data.files.filter(f => f.split('/events/').length > 1);
+        this.plannedEventFiles = data.files.filter(f => f.split('/plannedEvents/').length > 1);
         this.fullbodyFiles = data.files.filter(f => f.split('/fullbodies/').length > 1);
       });
     },
@@ -121,21 +130,25 @@ export default defineComponent({
   }
 })
 </script>
-<style>
+<style scoped>
 .header {
   width: 100%;
   text-align: center;
+  background-color: beige;
+  height: fit-content;
+}
+
+.flex {
+  display: flex;
+  align-content: start;
 }
 
 .loadDiv {
   display: inline-block;
+  width: 30%;
 }
 
 .tabHead {
   display: inline-block;
-}
-
-.tabContent {
-  width: 90%;
 }
 </style>

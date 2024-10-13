@@ -63,7 +63,11 @@ export default defineComponent({
 
             photoshootTraitsOptions: [
                 'indoor_private', 'indoor_public', 'outdoor_private', 'outdoor_public', 'studio',
-                'real_estate', 'bath', 'shower', 'fruit', 'party', 'pool', 'lingerie', 'nature', 'bride'
+                'real_estate', 'bath', 'shower', 'fruit', 'party', 'pool', 'lingerie', 'nature', 'bride',
+
+                // Custom
+                'close_up', 'creampie', 'internal_view', 'prolapse', 'gaping',
+                'anal', 'gangbang', 'facial', 'deepthroat', 'dp'
             ],
 
             // In Edit
@@ -234,7 +238,7 @@ export default defineComponent({
         },
         resetIds() {
             this.computeCurrentPhotos.forEach((p, i) => {
-                var newName = p.split("/").slice(0, -1).join("/") + "/" + i + "_" + p.split("/").slice(-1)[0].split("_").slice(1).join("_");
+                var newName = p.split("/").slice(0, -1).join("/") + "/" + i + "_" + p.split("/").slice(-1)[0].split("_").slice(1).filter(g => g != '').join("_");
                 window.ipcRenderer.send('img:rename', { oldPath: p, newPath: newName });
             });
         }
