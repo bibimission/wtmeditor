@@ -81,6 +81,7 @@ export default defineComponent({
                 'Background',
                 'Show Phone',
                 'Hide Phone',
+                'Dialog'
             ],
             otherGirls: '',
             placeChoices: [
@@ -94,7 +95,9 @@ export default defineComponent({
             eventPlace: null,
             eventChance: 0,
             eventConditions: [],
-            conditionChoices: []
+            conditionChoices: [],
+
+            eventParts: []
 
         }
     },
@@ -105,7 +108,7 @@ export default defineComponent({
         },
         loadEventElements() {
             window.ipcRenderer.invoke('file:read', { path: this.computeCurrentEventFile }).then((content) => {
-                this.eventElements = this.parseEventElements(content.split("\n"));
+                this.eventElements = this.parseEventElements(content);
             })
         },
         onImagePick(e, index) {
@@ -166,75 +169,161 @@ export default defineComponent({
 
             window.ipcRenderer.send('file:write', { path: this.computeCurrentEventFile, text: rpyText })
         },
-        parseEventElements(lines) {
-            var els = [];
-            lines.forEach((l) => {
-                var tokens = l.trim().split(" ");
-                if (tokens[0].charAt(0) == "#") {
-                    return;
-                }
-                var el = {};
-                if (tokens[0] == "player") {
-                    el.type = "Player Dialog";
-                    var texte = tokens.slice(1, tokens.length).join(" ");
-                    el.value = texte.substring(1, texte.length - 1);
-                } else if (tokens[0] == "event_girl") {
-                    el.type = "Girl Dialog";
-                    var texte = tokens.slice(1, tokens.length).join(" ");
-                    el.value = texte.substring(1, texte.length - 1);
-                } else if (tokens[0].charAt(0) == '"') {
-                    el.type = "Narration";
-                    var texte = tokens.slice(0, tokens.length).join(" ");
-                    el.value = texte.substring(1, texte.length - 1);
-                } else if (tokens[0] == "$selectedEvent.setImg()") {
-                    el.type = "Image End";
-                } else if (tokens[0] == "$selectedEvent.setVid()") {
-                    el.type = "Video End";
-                } else if (tokens[0].includes("$selectedEvent.setBackground")) {
-                    el.type = "Background";
-                    el.value = tokens[0].split('"')[1];
-                } else if (tokens[0].includes("$selectedEvent.setImg")) {
-                    el.type = "Image";
-                    el.value = l.trim().split('"')[1];
-                } else if (tokens[0].includes("$selectedEvent.setVid")) {
-                    el.type = "Video";
-                    el.value = l.trim().split('"')[1];
-                } else if (tokens[0] == "label") {
-                    el.type = "label";
-                    el.value = l;
-                } else if (tokens[0] == "show") {
-                    el.type = "Show Phone";
-                } else if (tokens[0] == "hide") {
-                    el.type = "Hide Phone";
-                } else if (tokens[0].split('DB_plannedEvents').length > 1) {
-                    const params = l.split('Event(')[1].split(', ');
-                    console.log(params)
-                    this.eventLabel = params[0].split('"')[1]
-                    this.eventCooldown = parseInt(params[1], 10);
-                    const timeFrame = params[2].split('[')[1].split(']')[0].split(',');
-                    this.hourStart = parseInt(timeFrame[0], 10);
-                    this.hourEnd = parseInt(timeFrame[1], 10);
-                    this.otherGirls = params[3].split(',').splice(1).join(',');
-                    const eventPlaceVal = params[4].split('"')[1]
-                    if (eventPlaceVal != '') {
-                        this.eventPlace = this.placeChoices.find(p => p.value == eventPlaceVal)
-                    }
-                    this.eventChance = parseFloat(params[5].split('=')[1].trim())
-                    const dayNumbers = params[6]?.split('[')[1]?.split(']')[0]?.split(',').map((el) => { return el == '' ? -1 : parseInt(el, 10) })
-                    dayNumbers.forEach((n) => {
-                        if (n >= 0) {
-                            this.eventDays.push(this.daysOptions.find(d => d.value == n))
+        parseEventElements(content) {
+            var labelParts = content.split('label')
+            labelParts.forEach((lp, index) => {
+                if (index == 0) { // Le début. C'est soit '' soit c'est le code qui insere dans la BDD des events
+                    if (lp.split('DB_plannedEvents').length > 1) {
+                        var l = lp.split('\n')[0]
+                        const params = l.split('Event(')[1].split(', ');
+                        console.log(params)
+                        this.eventLabel = params[0].split('"')[1]
+                        this.eventCooldown = parseInt(params[1], 10);
+                        const timeFrame = params[2].split('[')[1].split(']')[0].split(',');
+                        this.hourStart = parseInt(timeFrame[0], 10);
+                        this.hourEnd = parseInt(timeFrame[1], 10);
+                        this.otherGirls = params[3].split(',').splice(1).join(',');
+                        const eventPlaceVal = params[4].split('"')[1]
+                        if (eventPlaceVal != '') {
+                            this.eventPlace = this.placeChoices.find(p => p.value == eventPlaceVal)
                         }
-                    })
+                        this.eventChance = parseFloat(params[5].split('=')[1].trim())
+                        const dayNumbers = params[6]?.split('[')[1]?.split(']')[0]?.split(',').map((el) => { return el == '' ? -1 : parseInt(el, 10) })
+                        dayNumbers.forEach((n) => {
+                            if (n >= 0) {
+                                this.eventDays.push(this.daysOptions.find(d => d.value == n))
+                            }
+                        })
+                    }
                 }
                 else {
-                    return;
+                    var lines = lp.split('\n')
+                    var els = [];
+
+                    var currentEl = null;
+
+                    for (var lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+                        var l = lines[lineIndex];
+                        var tokens = l.trim().split(" ");
+
+                        // Comments are ignored and will disappear
+                        if (tokens[0].charAt(0) == "#") {
+                            continue;
+                        }
+
+                        // Title of the part. Ignored too
+                        if (lineIndex == 0) {
+                            continue
+                        }
+
+
+
+                        // Parse Menu. We admit there is not more than 1 menu per label
+                        if (l.trim() == 'menu:') {
+                            currentEl = { type: 'Menu', els: [], parent: null, indent: (l.length - l.trim().length) }
+                            continue;
+                        }
+
+                        // Parse Menu Options
+                        if (currentEl != null && (currentEl.type == 'Option' || currentEl.type == 'Menu')) {
+                            if (l.trim().charAt(l.trim().length - 1) == ':') {
+                                if (currentEl.type == 'Option') {
+                                    var parent = currentEl.parent
+                                    currentEl.parent = null
+                                    parent.els.push(currentEl)
+                                    currentEl = parent
+                                }
+                                if (currentEl.type == 'Menu') {
+                                    currentEl = { type: 'Option', text: l.trim().substring(1, l.trim().length - 1), els: [], parent: currentEl, indent: (l.length - l.trim().length) }
+                                    continue
+                                }
+                            }
+
+                            // Check for Menu or Option End
+                            while (currentEl != null && (l.length - l.trim().length) <= currentEl.indent) {
+                                //console.log(currentEl)
+                                var parent = currentEl.parent
+                                if(parent != null){
+                                    parent.els.push(currentEl)
+                                    currentEl.parent = null
+                                    currentEl = parent
+                                }else{
+                                    els.push(currentEl);
+                                    currentEl = null
+                                }
+                            }
+                        }
+
+                        /// Elements classiques
+                        var el = {};
+
+                        // Show/Hide phone. value == true means vibrate
+                        if (l.trim() == 'show phone') {
+                            el.type = 'Show Phone'
+                            if (lines[lineIndex + 1].trim() == 'with hpunch') {
+                                el.value = true
+                            }
+                        } else if (l.trim() == 'hide phone') {
+                            el.type = 'Hide Phone'
+                        }
+
+                        // Dialogs
+                        else if (tokens[0] == "player" || tokens[0].split("event_girls[").length > 1 || tokens[0] == "ptaPresident.char" || tokens[0] == '"Phone"') {
+                            el.type = 'Dialog'
+                            var texte = tokens.slice(1, tokens.length).join(" ");
+                            el.text = texte.substring(1, texte.length - 1);
+                            el.value = tokens[0]
+                        }
+
+                        // Narration
+                        else if (tokens[0].charAt(0) == '"') {
+                            el.type = "Narration";
+                            var texte = tokens.slice(0, tokens.length).join(" ");
+                            el.value = texte.substring(1, texte.length - 1);
+                        }
+
+                        // Jump
+                        else if (tokens[0] == "jump") {
+                            el.type = 'Jump'
+                            el.value = tokens[1]
+                        }
+
+
+                        /*
+                        else if (tokens[0] == "$selectedEvent.setImg()") {
+                            el.type = "Image End";
+                        } else if (tokens[0] == "$selectedEvent.setVid()") {
+                            el.type = "Video End";
+                        } else if (tokens[0].includes("$selectedEvent.setBackground")) {
+                            el.type = "Background";
+                            el.value = tokens[0].split('"')[1];
+                        } else if (tokens[0].includes("$selectedEvent.setImg")) {
+                            el.type = "Image";
+                            el.value = l.trim().split('"')[1];
+                        } else if (tokens[0].includes("$selectedEvent.setVid")) {
+                            el.type = "Video";
+                            el.value = l.trim().split('"')[1];
+                        }
+                        else {
+                            return;
+                        }
+                            */
+
+                        if (el.type != undefined) {
+                            if (currentEl != null) {
+                                currentEl.els.push(el);
+                            } else {
+                                els.push(el);
+                            }
+                        }
+                    }
+                    if (currentEl != null) {
+                        els.push(currentEl);
+                    }
+                    this.eventParts.push({ name: this.eventLabel + (index == 0 ? '' : '_part_' + index), elements: els })
                 }
-                if (el.type != undefined) {
-                    els.push(el);
-                }
-            });
-            return els;
+            })
+            console.log(this.eventParts)
         },
         addElement() {
             this.eventElements.push({ type: 'Narration', value: '' });
