@@ -67,7 +67,7 @@ export default defineComponent({
 
                 // Custom
                 'close_up', 'creampie', 'internal_view', 'prolapse', 'gaping',
-                'anal', 'gangbang', 'facial', 'deepthroat', 'dp'
+                'anal', 'gangbang', 'facial', 'deepthroat', 'dp', 'lesbian', 'blowjob', 'vaginal'
             ],
 
             // In Edit

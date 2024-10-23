@@ -9,7 +9,7 @@
         <div class="col imgContainer" :class="{ 'reduced': photoInEdit != '' }">
             <div class="imgGrid">
                 <img v-for="img, index in computeCurrentPhotos" :key="index" :src="img" @click="imageClick($event, img)" :class="{ 'wrong': !isGoodFormat(img), 'selected': photoInEdit == img, 'cover': img.split('cover').length > 1 }" @dragstart="dragStart" @drop="dropped" @dragenter="cancelDefault" @dragover="cancelDefault" :name="img">
-                <q-spinner class="absolute-center" color="white" size="3em" v-if="isConverting" />
+                <q-spinner class="absolute-center" color="red" size="3em" v-if="isConverting" />
             </div>
             <img ref="samplePhoto" :src="computeCurrentPhotos[0]" class="hidden">
         </div>
