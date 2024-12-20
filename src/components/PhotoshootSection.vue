@@ -63,7 +63,7 @@ export default defineComponent({
 
             photoshootTraitsOptions: [
                 'indoor_private', 'indoor_public', 'outdoor_private', 'outdoor_public', 'studio',
-                'real_estate', 'bath', 'shower', 'fruit', 'party', 'pool', 'lingerie', 'nature', 'bride',
+                'real_estate', 'bath', 'shower', 'fruit', 'party', 'pool', 'lingerie', 'nature', 'bride', 'sport', 'cosplay', 'heels', 'fashion', 'stockings',
 
                 // Custom
                 'close_up', 'creampie', 'internal_view', 'prolapse', 'gaping',

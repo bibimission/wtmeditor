@@ -5,16 +5,7 @@
         </q-btn>
     </div>
     <div class="eventElements col" v-if="currentEvent != ''">
-        <div v-for="el, index in computeEventElements" :key="index" class="elRow">
-            <q-select class="col elType" v-if="el.type != 'label'" @update:model-value="onElementChange" v-model="eventElements[index].type" label="Element Type" :options="elementTypes"></q-select>
-            <div class="col elInput" v-if="el.type != 'label'">
-                <q-input type="textarea" rows="2" v-if="el.type == 'Narration' || el.type == 'Player Dialog' || el.type == 'Girl Dialog'" v-model="el.value" label="Value" @change="onElementChange"></q-input>
-                <ImageSelect class="imageSelect" @change="onImagePick($event, index)" :type="el.type" :photos="computeCurrentPhotos" :prefix="currentEvent" v-if="el.type == 'Image' || el.type == 'Video' || el.type == 'Background'" v-model="eventElements[index].value"></ImageSelect>
-            </div>
-            <div class="col elToolBar" v-if="el.type != 'label'">
-                <q-btn @click="removeElement(el)" icon="delete"></q-btn>
-            </div>
-        </div>
+        <EventElementForm v-for="el, index in eventParts" :key="index" :element="el" :photos="computeCurrentPhotos" :eventName="currentEvent"></EventElementForm>
         <q-btn @click="addElement">Add</q-btn>
     </div>
     <fieldset class="eventForm col text-black" v-if="currentEvent != ''">
@@ -41,11 +32,13 @@
 import { defineComponent } from 'vue'
 import ImageSelect from './ImageSelect.vue';
 import CustomMedia from './CustomMedia.vue';
+import EventElementForm from './EventElementForm.vue';
 
 export default defineComponent({
     components: {
         ImageSelect,
-        CustomMedia
+        CustomMedia,
+        EventElementForm
     },
     props: {
         files: Array,
@@ -70,19 +63,6 @@ export default defineComponent({
             eventDays: [],
 
             eventElements: [],
-            elementTypes: [
-                'Narration',
-                'Player Dialog',
-                'Girl Dialog',
-                'Image',
-                'Image End',
-                'Video',
-                'Video End',
-                'Background',
-                'Show Phone',
-                'Hide Phone',
-                'Dialog'
-            ],
             otherGirls: '',
             placeChoices: [
                 { label: 'Home', value: 'home' },
@@ -170,6 +150,7 @@ export default defineComponent({
             window.ipcRenderer.send('file:write', { path: this.computeCurrentEventFile, text: rpyText })
         },
         parseEventElements(content) {
+            this.eventParts = []
             var labelParts = content.split('label')
             labelParts.forEach((lp, index) => {
                 if (index == 0) { // Le début. C'est soit '' soit c'est le code qui insere dans la BDD des events
@@ -215,8 +196,6 @@ export default defineComponent({
                         if (lineIndex == 0) {
                             continue
                         }
-
-
 
                         // Parse Menu. We admit there is not more than 1 menu per label
                         if (l.trim() == 'menu:') {
@@ -320,7 +299,7 @@ export default defineComponent({
                     if (currentEl != null) {
                         els.push(currentEl);
                     }
-                    this.eventParts.push({ name: this.eventLabel + (index == 0 ? '' : '_part_' + index), elements: els })
+                    this.eventParts.push({ name: this.eventLabel + (index == 0 ? '' : '_part_' + index), els: els, type: 'Label' })
                 }
             })
             console.log(this.eventParts)
@@ -377,26 +356,7 @@ export default defineComponent({
 
 .eventElements {
     background-color: pink;
-    width: 65%;
-}
-
-.elType {
-    width: 15%;
-}
-
-.elInput {
-    width: 70%;
-}
-
-.elInput .imageSelect {
-    margin: auto;
-    min-width: 5vw;
-    min-height: 3vh;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.elToolBar {
-    width: 10%;
+    width: 90vw;
 }
 
 .imgGrid {
