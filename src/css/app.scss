@@ -16,3 +16,17 @@ img, video{
     right:0;
     margin: auto;
 }
+.stretch{
+    width: 100%;
+    height: 100%;
+}
+
+:root{
+    --color-first: #69247C;
+    --color-second: #DA498D;
+    --color-third: #FAC67A;
+    --color-fourth: #F9E6CF;
+}
+.h-fit{
+    height: fit-content;
+}

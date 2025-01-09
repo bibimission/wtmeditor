@@ -10,7 +10,7 @@
     </div>
     <fieldset class="eventForm col text-black" v-if="currentEvent != ''">
         <legend>Event Info</legend>
-        <q-input v-model="eventLabel" @change="onElementChange" label="Label"></q-input>
+        <q-input v-model="eventLabel" @change="onElementChange" label="Label" disable></q-input>
         <q-input v-model="eventCooldown" @change="onElementChange" type="number" label="Cooldown"></q-input>
 
         <fieldset>
@@ -84,6 +84,7 @@ export default defineComponent({
     methods: {
         selectEvent(e, event) {
             this.currentEvent = event;
+            this.eventLabel = event.split('/').slice(-1)
             this.loadEventElements();
         },
         loadEventElements() {
@@ -239,9 +240,7 @@ export default defineComponent({
                         // Show/Hide phone. value == true means vibrate
                         if (l.trim() == 'show phone') {
                             el.type = 'Show Phone'
-                            if (lines[lineIndex + 1].trim() == 'with hpunch') {
-                                el.value = true
-                            }
+                            el.value = lines[lineIndex + 1].trim() == 'with hpunch'
                         } else if (l.trim() == 'hide phone') {
                             el.type = 'Hide Phone'
                         }
@@ -258,13 +257,18 @@ export default defineComponent({
                         else if (tokens[0].charAt(0) == '"') {
                             el.type = "Narration";
                             var texte = tokens.slice(0, tokens.length).join(" ");
-                            el.value = texte.substring(1, texte.length - 1);
+                            el.text = texte.substring(1, texte.length - 1);
                         }
 
                         // Jump
                         else if (tokens[0] == "jump") {
                             el.type = 'Jump'
                             el.value = tokens[1]
+                        }
+                        
+                        // Event end
+                        else if (l.split("$ renpy.jump(store.locationFrom)").length  > 1) {
+                            el.type = 'Event End'
                         }
 
 
@@ -351,12 +355,12 @@ export default defineComponent({
 }
 
 .eventForm {
-    width: 30%;
+    width: 18vw;
 }
 
 .eventElements {
     background-color: pink;
-    width: 90vw;
+    width: 75vw;
 }
 
 .imgGrid {

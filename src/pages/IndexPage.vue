@@ -1,13 +1,13 @@
 <template>
   <q-page class="flex">
     <div class="header">
-      <div class="loadDiv">
-        <q-input v-model="folderPath" label="Girl Name" />
-        <q-btn @click="loadFolder" glossy color="green">Load</q-btn>
-        <q-btn @click="createFolder" glossy color="purple">Create</q-btn>
+      <div class="loadDiv row">
+        <q-input v-model="folderPath" label="Girl Name" class="col-6"/>
+        <q-btn @click="loadFolder" glossy color="green" class="h-fit">Load</q-btn>
+        <q-btn @click="createFolder" glossy color="purple" class="h-fit">Create</q-btn>
       </div>
       <div class="tabHead">
-        <q-tabs v-model="tab" class="text-teal">
+        <q-tabs v-model="tab">
           <q-tab name="infos" icon="info" label="Infos" />
           <q-tab name="bodyparts" icon="person" label="Bodyparts" />
           <q-tab name="fullbody" icon="woman" label="Fullbody" />
@@ -18,7 +18,7 @@
         </q-tabs>
       </div>
     </div>
-    <div clas="tabContent">
+    <div class="tabContent">
       <q-tab-panels v-model="tab" animated class="bg-white text-white">
         <q-tab-panel name="infos">
           <GirlInfoForm v-model="girlInfos" @change="saveGirl" ref="girlInfoForm"></GirlInfoForm>
@@ -134,8 +134,9 @@ export default defineComponent({
 .header {
   width: 100%;
   text-align: center;
-  background-color: beige;
+  background-color: var(--color-third);
   height: fit-content;
+  display: flex;
 }
 
 .flex {
@@ -144,11 +145,26 @@ export default defineComponent({
 }
 
 .loadDiv {
-  display: inline-block;
-  width: 30%;
+  display: flex;
+  width: 30vw;
+  border: var(--color-fourth) solid 3px;
+  padding: 1vh 0;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,0.2);
 }
 
 .tabHead {
-  display: inline-block;
+  display: flex;
+  margin: auto;
+  height: fit-content;
+}
+.tabContent{
+  width: 100%;
+  height: fit-content;
+}
+.q-tab--active{
+  color: white;
+  background-color: var(--color-second);
 }
 </style>

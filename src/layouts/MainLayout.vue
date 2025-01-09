@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar>
+      <q-toolbar class="glossy">
         <q-toolbar-title>
           WTM Editor
         </q-toolbar-title>
@@ -20,3 +20,8 @@ export default defineComponent({
   name: 'MainLayout',
 })
 </script>
+<style scoped>
+.q-header{
+  background-color: var(--color-first);
+}
+</style>
