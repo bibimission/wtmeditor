@@ -37,7 +37,7 @@
         </q-tab-panel>
 
         <q-tab-panel name="plannedEvents">
-          <PlannedEventSection :files="plannedEventFiles" :folderPath="folderPath"></PlannedEventSection>
+          <PlannedEventSection :files="plannedEventFiles" :folderPath="folderPath" :apiGirls="apiGirls"></PlannedEventSection>
         </q-tab-panel>
 
         <q-tab-panel name="photoshoots">
@@ -94,7 +94,9 @@ export default defineComponent({
       photoshootFiles: [],
       eventFiles: [],
       fullbodyFiles: [],
-      plannedEventFiles: []
+      plannedEventFiles: [],
+
+      apiGirls: []
     }
   },
   methods: {
@@ -127,6 +129,11 @@ export default defineComponent({
     computeVideos() {
       return this.videos;
     }
+  },
+  mounted(){
+    window.ipcRenderer.invoke('api:getAll', { }).then((girlList) => {
+      this.apiGirls = girlList
+    })
   }
 })
 </script>

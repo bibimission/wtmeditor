@@ -3,6 +3,7 @@ import path from 'path'
 import os from 'os'
 import FolderTool from './services/folderTool';
 import ImageTool from './services/imageTool';
+import ApiTool from './services/apiTool';
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -14,6 +15,7 @@ try {
 } catch (_) { }
 
 const folderTool = new FolderTool();
+const apiTool = new ApiTool();
 
 let mainWindow
 
@@ -88,6 +90,9 @@ ipcMain.handle('webm:resize', async (e, data) => {
 })
 ipcMain.handle('img:getFrames', async (e, data) => {
   return await ImageTool.convertWebpToWebm(data.img);
+})
+ipcMain.handle('api:getAll', async (e, data) => {
+  return await apiTool.getCharacterList();
 })
 ipcMain.handle('file:read', async (e, data) => {
   return await folderTool.readFile(data.path);

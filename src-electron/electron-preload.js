@@ -52,7 +52,8 @@ const ipc = {
             'img:remove-bg',
             'img:convert:webm',
             'img:getFrames',
-            'webm:resize'
+            'webm:resize',
+            'api:getAll'
         ]
     }
 }
