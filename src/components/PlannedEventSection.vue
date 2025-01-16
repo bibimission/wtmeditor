@@ -14,7 +14,7 @@
         <q-input v-model="event.cooldown" @change="onElementChange" type="number" label="Cooldown"></q-input>
 
         <fieldset>
-            <ApiGirlSelector :apiGirls="apiGirls" v-model="event.girlsNeeded" @update:modelValue="onElementChange"></ApiGirlSelector>
+            <ApiGirlSelector :apiGirls="apiGirls" v-model="event.girlsNeeded" @update:modelValue="onElementChange" :permanentGirl="folderPath"></ApiGirlSelector>
             <q-select class=" " @update:model-value="onElementChange" :options="placeChoices" label="Place" v-model="event.place"></q-select>
             <q-input type="number" v-model="event.hourStart" label="Hour Start" min="1" max="23" @change="onElementChange"></q-input>
             <q-input type="number" v-model="event.hourEnd" label="Hour End" min="1" max="23" @change="onElementChange"></q-input>
@@ -96,7 +96,7 @@ export default defineComponent({
     methods: {
         selectEvent(e, event) {
             this.currentEvent = event;
-            this.eventLabel = event.split('/').slice(-1)
+            this.event.label = event.split('/').slice(-1)
             this.loadEventElements();
         },
         loadEventElements() {
@@ -114,7 +114,7 @@ export default defineComponent({
             console.log(this.event)
         },
         addElement() {
-            this.eventElements.push({ type: 'Part', value: '' });
+            this.event.parts.push({ type: 'Label', name: this.event.label + '_'+(this.event.parts.length +1), els:[] });
         }
     },
     computed: {
@@ -136,7 +136,7 @@ export default defineComponent({
         computeCurrentEventFile() {
             var theF = this.files.find(p => p.split(this.currentEvent).length > 1 && p != this.currentEvent && p.split(".")[1] == "rpy");
             if (theF == null) {
-                theF = './packs/' + this.folderPath + '/plannedEvents/' + this.eventLabel + '/' + this.eventLabel + '.rpy';
+                theF = './packs/' + this.folderPath + '/plannedEvents/' + this.event.label + '/' + this.event.label + '.rpy';
             }
             return theF;
         }

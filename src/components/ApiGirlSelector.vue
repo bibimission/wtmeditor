@@ -4,7 +4,7 @@
         <div class="selectedGirlsList">
             <div v-for="(g, i) in computeSelectedGirls" :key="i" class="girlAvatar" @click="toggleGirl(g)">
                 <img :src="'https://cdn.ninoss.fr/WTM/GIRLS/' + g.fullName + '.webp'">
-                <span>{{ g.name }}</span>
+                <span>{{ g.name +(g.pta ? ' (PTA)' : '') }}</span>
             </div>
         </div>
         <div class="p-relative">
@@ -12,7 +12,7 @@
             <div class="selectList" v-show="listOpened">
                 <div v-for="(g, i) in computeSearchedGirls" :key="i" class="girlOption" :class="{'selected': modelValue.includes(g.fullName)}" @click="toggleGirl(g)" tabindex="0">
                     <img :src="'https://cdn.ninoss.fr/WTM/GIRLS/' + g.fullName + '.webp'">
-                    <span>{{ g.name }}</span>
+                    <span>{{ g.name +(g.pta ? ' (PTA)' : '')}}</span>
                 </div>
             </div>
         </div>
@@ -25,7 +25,8 @@ export default {
             type: Array,
             default: () => { return [] }
         },
-        modelValue: Array
+        modelValue: Array,
+        permanentGirl: String
     },
     data() {
         return {
@@ -37,10 +38,10 @@ export default {
     emits: ['update:modelValue'],
     computed: {
         computeGirlList() {
-            return this.apiGirls.map((g) => { return { name: this.getParsedName(g), fullName: g } }).sort((a,b)=>{ return a.name.localeCompare(b.name) })
+            return this.apiGirls.map((g) => { return { name: this.getParsedName(g), fullName: g, pta: g.split('_PTA_').length > 1 } }).sort((a,b)=>{ return a.name.localeCompare(b.name) })
         },
         computeSelectedGirls() {
-            return this.computeGirlList.filter((g) => { return this.currentSelection.includes(g.fullName) })
+            return this.computeGirlList.filter((g) => { return this.currentSelection.includes(g.fullName) || this.permanentGirl == g.fullName })
         },
         computeSearchedGirls() {
             return (this.currentSearch == '' ? this.computeGirlList : this.computeGirlList.filter((g) => { return g.fullName.toUpperCase().split(this.currentSearch.toUpperCase()).length > 1 })).slice(0, 10)
@@ -55,6 +56,9 @@ export default {
             return toks.slice(-2).join(' ')
         },
         toggleGirl(g){
+            if(this.permanentGirl == g.fullName){
+                return
+            }
             if(this.currentSelection.includes(g.fullName)){
                 this.currentSelection = this.currentSelection.filter(gg => g.fullName != gg)
             }else{

@@ -17,6 +17,25 @@ export default class EventParser {
         { label: 'On the way to school', value: 'gotoschool' },
         { label: 'On the way back Home', value: 'lb_academyhall_home' },
     ]
+    static elementTypes = [
+        'Narration',
+        'Image',
+        'Image End',
+        'Video',
+        'Video End',
+        'Background',
+        'Show Phone',
+        'Hide Phone',
+        'Dialog',
+
+        // Special
+        'Label',
+        'Menu',
+        'Option',
+        'Jump',
+
+        'Event End'
+    ]
 
     static parsePythonToObject(eventTxt) {
 
@@ -36,7 +55,7 @@ export default class EventParser {
         labelParts.forEach((lp, index) => {
             if (index == 0) { // Le début. C'est soit '' soit c'est le code qui insere dans la BDD des events
                 if (lp.split('DB_plannedEvents').length > 1) {
-                    var l = lp.split('\n')[0]
+                    var l = lp.split('\n')[1]
                     const params = l.split('Event(')[1].split(', ');
                     console.log(params)
                     event.label = params[0].split('"')[1]
@@ -44,7 +63,7 @@ export default class EventParser {
                     const timeFrame = params[2].split('[')[1].split(']')[0].split(',');
                     event.hourStart = parseInt(timeFrame[0], 10);
                     event.hourEnd = parseInt(timeFrame[1], 10);
-                    event.girlsNeeded = params[3].split(',').splice(1).join(',');
+                    event.girlsNeeded = params[3].split(',').splice(1);
                     const eventPlaceVal = params[4].split('"')[1]
                     if (eventPlaceVal != '') {
                         event.place = EventParser.placeChoices.find(p => p.value == eventPlaceVal)
@@ -182,7 +201,7 @@ export default class EventParser {
                 if (currentEl != null) {
                     els.push(currentEl);
                 }
-                event.parts.push({ name: event.label + (index == 0 ? '' : '_part_' + index), els: els, type: 'Label' })
+                event.parts.push({ name: event.label + (index == 1 ? '' : '_part_' + index), els: els, type: 'Label' })
             }
         })
         return event
@@ -200,44 +219,77 @@ export default class EventParser {
             '))":\n';
         rpyText += "\n";
         rpyText += "label " + event.label + ":\n";
-        event.parts.forEach(function(e, i) {
-            switch (e.type) {
-                case "label":
-                    //rpyText += e.value + "\n";
-                    break;
-                case "Narration":
-                    rpyText += fourSpaces + "\"" + e.value + "\"\n";
-                    break;
-                case "Player Dialog":
-                    rpyText += fourSpaces + "player \"" + e.value + "\"\n";
-                    break;
-                case "Girl Dialog":
-                    rpyText += fourSpaces + "event_girl \"" + e.value + "\"\n";
-                    break;
-                case "Image":
-                    rpyText += fourSpaces + "$selectedEvent.setImg(\"" + e.value + "\")\n";
-                    break;
-                case "Image End":
-                    rpyText += fourSpaces + "$selectedEvent.setImg()\n";
-                    break;
-                case "Video":
-                    rpyText += fourSpaces + "$selectedEvent.setVid(\"" + e.value + "\")\n";
-                    break;
-                case "Video End":
-                    rpyText += fourSpaces + "$selectedEvent.setVid()\n";
-                    break;
-                case "Show Phone":
-                    rpyText += fourSpaces + "show phone\n";
-                    break;
-                case "Hide Phone":
-                    rpyText += fourSpaces + "hide phone\n";
-                    break;
-                case "Background":
-                    rpyText += fourSpaces + "$selectedEvent.setBackground(\"" + e.value + "\")\n";
-                    break;
-            }
-        });
+
+        var recurVar = [rpyText]
+        event.parts.forEach((p) => {
+            EventParser.elementToPythonRecu(p, recurVar)
+        })
+        rpyText = recurVar[0]
         rpyText += fourSpaces + "jump eventend\n";
         return rpyText
+    }
+
+    static elementToPythonRecu(el, pythonStr, currentIndent = 0) {
+        switch (el.type) {
+            case "Label":
+                pythonStr[0] += 'label ' + el.name + ':\n'
+                el.els.forEach((e) => {
+                    EventParser.elementToPythonRecu(e, pythonStr, currentIndent + 1)
+                })
+                break;
+            case "Menu":
+                pythonStr[0] += this.getIndent(currentIndent) + 'menu ' + el.text + ':\n'
+                el.els.forEach((e) => {
+                    EventParser.elementToPythonRecu(e, pythonStr, currentIndent + 1)
+                })
+            break;
+            case "Option":
+                pythonStr[0] += this.getIndent(currentIndent) + 'option ' + el.text + ':\n'
+                el.els.forEach((e) => {
+                    EventParser.elementToPythonRecu(e, pythonStr, currentIndent + 1)
+                })
+            break;
+            case "Event End":
+                pythonStr[0] += this.getIndent(currentIndent) + "jump eventend\n";
+                break;
+            case "Jump":
+                pythonStr[0] += this.getIndent(currentIndent) + "jump "+el.value+"\n";
+                break;
+            case "Narration":
+                pythonStr[0] += this.getIndent(currentIndent) + "\"" + el.value + "\"\n";
+                break;
+            case "Dialog":
+                pythonStr[0] += this.getIndent(currentIndent) + el.value+" \"" + el.text + "\"\n";
+                break;
+            case "Image":
+                pythonStr[0] += this.getIndent(currentIndent) + "$selectedEvent.setImg(\"" + el.value + "\")\n";
+                break;
+            case "Image End":
+                pythonStr[0] += this.getIndent(currentIndent) + "$selectedEvent.setImg()\n";
+                break;
+            case "Video":
+                pythonStr[0] += this.getIndent(currentIndent) + "$selectedEvent.setVid(\"" + el.value + "\")\n";
+                break;
+            case "Video End":
+                pythonStr[0] += this.getIndent(currentIndent) + "$selectedEvent.setVid()\n";
+                break;
+            case "Show Phone":
+                pythonStr[0] += this.getIndent(currentIndent) + "show phone\n";
+                break;
+            case "Hide Phone":
+                pythonStr[0] += this.getIndent(currentIndent) + "hide phone\n";
+                break;
+            case "Background":
+                pythonStr[0] += this.getIndent(currentIndent) + "$selectedEvent.setBackground(\"" + el.value + "\")\n";
+                break;
+        }
+    }
+
+    static getIndent(indentLvl){
+        var ret = ''
+        for(var i =0; i < indentLvl; i++){
+            ret += "    "
+        }
+        return ret
     }
 }

@@ -7,14 +7,14 @@
         </div>
         <div v-else-if="element.type == 'Menu'" class="menuBody">
             <div class="col elType">
-                <q-select v-model="element.type" label="Element Type" :options="elementTypes" :disable="element.type=='Option'" filled></q-select>
+                <q-select v-model="element.type" label="Element Type" :options="elementTypes" :disable="element.type == 'Option'" filled></q-select>
             </div>
             <EventElementForm v-for="(el, i) in element.els" :key="i" :element="el" :photos="photos" :eventName="eventName" class="innerRow"></EventElementForm>
             <q-btn @click="addElement">Add</q-btn>
         </div>
         <template v-else>
             <div class="col elType">
-                <q-select v-model="element.type" label="Element Type" :options="elementTypes" :disable="element.type=='Option'" filled></q-select>
+                <q-select v-model="element.type" label="Element Type" :options="elementTypes" :disable="element.type == 'Option'" filled></q-select>
             </div>
             <div class="col elInput" v-if="element.type != 'Label'">
                 <template v-if="element.type === 'Narration'">
@@ -43,6 +43,7 @@
     </div>
 </template>
 <script>
+import EventParser from 'src/utils/eventParser';
 import ImageSelect from './ImageSelect.vue';
 export default {
     components: { ImageSelect },
@@ -60,24 +61,7 @@ export default {
     emits: ['remove'],
     data() {
         return {
-            elementTypes: [
-                'Narration',
-                'Image',
-                'Image End',
-                'Video',
-                'Video End',
-                'Background',
-                'Show Phone',
-                'Hide Phone',
-                'Dialog',
-
-                // Special
-                'Label',
-                'Menu',
-                'Option',
-
-                'Event End'
-            ]
+            elementTypes: EventParser.elementTypes
         }
     },
     methods: {
@@ -86,8 +70,11 @@ export default {
         },
         onElementChange() { },
         addElement() {
+            if (this.element.els == undefined) {
+                this.element.els = []
+            }
             if (this.element.type == 'Menu') {
-                this.element.els.push({ type: 'Option', text: '' })
+                this.element.els.push({ type: 'Option', text: '', els: [] })
             } else {
                 this.element.els.push({ type: 'Narration', text: '' })
             }
@@ -155,7 +142,8 @@ export default {
     background-color: rgb(250, 202, 112);
     color: black;
 }
-.optionBody{
+
+.optionBody {
     background-color: rgb(171, 250, 155);
 }
 </style>
