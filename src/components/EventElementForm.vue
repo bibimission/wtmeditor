@@ -20,6 +20,9 @@
                 <template v-if="element.type === 'Narration'">
                     <q-input type="textarea" rows="2" v-model="element.text" label="Value" @change="onElementChange" style="width:60%"></q-input>
                 </template>
+                <template v-if="element.type === 'Jump'">
+                    <q-input type="text" rows="2" v-model="element.value" label="Value" @change="onElementChange" style="width:60%"></q-input>
+                </template>
                 <template v-if="element.type === 'Option'">
                     <div class="stretch optionBody">
                         <q-input type="text" v-model="element.text" label="Value" @change="onElementChange" style="width:60%"></q-input>

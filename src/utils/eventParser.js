@@ -54,27 +54,31 @@ export default class EventParser {
         var labelParts = eventTxt.split('label')
         labelParts.forEach((lp, index) => {
             if (index == 0) { // Le début. C'est soit '' soit c'est le code qui insere dans la BDD des events
-                if (lp.split('DB_plannedEvents').length > 1) {
-                    var l = lp.split('\n')[1]
-                    const params = l.split('Event(')[1].split(', ');
-                    console.log(params)
-                    event.label = params[0].split('"')[1]
-                    event.cooldown = parseInt(params[1], 10);
-                    const timeFrame = params[2].split('[')[1].split(']')[0].split(',');
-                    event.hourStart = parseInt(timeFrame[0], 10);
-                    event.hourEnd = parseInt(timeFrame[1], 10);
-                    event.girlsNeeded = params[3].split(',').splice(1);
-                    const eventPlaceVal = params[4].split('"')[1]
-                    if (eventPlaceVal != '') {
-                        event.place = EventParser.placeChoices.find(p => p.value == eventPlaceVal)
-                    }
-                    event.chance = parseFloat(params[5].split('=')[1].trim())
-                    const dayNumbers = params[6]?.split('[')[1]?.split(']')[0]?.split(',').map((el) => { return el == '' ? -1 : parseInt(el, 10) })
-                    dayNumbers.forEach((n) => {
-                        if (n >= 0) {
-                            event.days.push(EventParser.daysOptions.find(d => d.value == n))
+                if(lp != ''){
+                    if (lp.split('DB_plannedEvents').length > 1) {
+                        var l = lp.split('\n')[1]
+                        const params = l.split('Event(')[1].split(', ');
+                        console.log(params)
+                        event.label = params[0].split('"')[1]
+                        event.cooldown = parseInt(params[1], 10);
+                        const timeFrame = params[2].split('[')[1].split(']')[0].split(',');
+                        event.hourStart = parseInt(timeFrame[0], 10);
+                        event.hourEnd = parseInt(timeFrame[1], 10);
+                        event.girlsNeeded = params[3].split(',').splice(1);
+                        const eventPlaceVal = params[4].split('"')[1]
+                        if (eventPlaceVal != '') {
+                            event.place = EventParser.placeChoices.find(p => p.value == eventPlaceVal)
                         }
-                    })
+                        event.chance = parseFloat(params[5].split('=')[1].trim())
+                        const dayNumbers = params[6]?.split('[')[1]?.split(']')[0]?.split(',').map((el) => { return el == '' ? -1 : parseInt(el, 10) })
+                        dayNumbers.forEach((n) => {
+                            if (n >= 0) {
+                                event.days.push(EventParser.daysOptions.find(d => d.value == n))
+                            }
+                        })
+                    }
+                }else{
+                    event.label = labelParts[1].split(' ')[1]
                 }
             } else {
                 var lines = lp.split('\n')
@@ -96,8 +100,8 @@ export default class EventParser {
                         continue
                     }
 
-                    // Parse Menu. We admit there is not more than 1 menu per label
-                    if (l.trim() == 'menu:') {
+                    // Parse Menu.
+                    if (l.trim() == 'menu:' || l.trim() == 'menu :' ) {
                         currentEl = { type: 'Menu', els: [], parent: null, indent: (l.length - l.trim().length) }
                         continue;
                     }
@@ -144,7 +148,7 @@ export default class EventParser {
                     }
 
                     // Dialogs
-                    else if (tokens[0] == "player" || tokens[0].split("event_girls[").length > 1 || tokens[0] == "ptaPresident.char" || tokens[0] == '"Phone"') {
+                    else if (tokens[0] == "player" || tokens[0].split("event_girls[").length > 1 || tokens[0] == "ptaPresident.char" || tokens[0] == '"Phone"' || tokens[0] == 'event_girl') {
                         el.type = 'Dialog'
                         var texte = tokens.slice(1, tokens.length).join(" ");
                         el.text = texte.substring(1, texte.length - 1);
@@ -158,19 +162,17 @@ export default class EventParser {
                         el.text = texte.substring(1, texte.length - 1);
                     }
 
+                    // Event end
+                    else if (l.split("$ renpy.jump(store.locationFrom)").length > 1 || l.split('jump eventend').length > 1) {
+                        el.type = 'Event End'
+                    }
+
                     // Jump
                     else if (tokens[0] == "jump") {
                         el.type = 'Jump'
                         el.value = tokens[1]
                     }
 
-                    // Event end
-                    else if (l.split("$ renpy.jump(store.locationFrom)").length > 1) {
-                        el.type = 'Event End'
-                    }
-
-
-                    /*
                     else if (tokens[0] == "$selectedEvent.setImg()") {
                         el.type = "Image End";
                     } else if (tokens[0] == "$selectedEvent.setVid()") {
@@ -185,10 +187,6 @@ export default class EventParser {
                         el.type = "Video";
                         el.value = l.trim().split('"')[1];
                     }
-                    else {
-                        return;
-                    }
-                        */
 
                     if (el.type != undefined) {
                         if (currentEl != null) {

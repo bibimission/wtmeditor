@@ -75,7 +75,6 @@ export default defineComponent({
                 place: ""
             },
 
-            eventElements: [],
             placeChoices: [
                 { label: 'Home', value: 'home' },
                 { label: 'Academy Hall', value: 'academyhall' },
@@ -101,7 +100,7 @@ export default defineComponent({
         },
         loadEventElements() {
             window.ipcRenderer.invoke('file:read', { path: this.computeCurrentEventFile }).then((content) => {
-                this.eventElements = this.parseEventElements(content);
+                this.parseEventElements(content);
             })
         },
         onElementChange() {
