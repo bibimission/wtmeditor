@@ -1,92 +1,92 @@
 <template>
-    <q-bar color="blue">Portrait</q-bar>
-    <div class="imgGrid">
-        <div v-for="pic, index in files.filter(p => p.split('portrait').length > 1 && p.split('tportrait').length <= 1)" :key="index">
-            <CustomMedia :src="pic"></CustomMedia>
-        </div>
-        <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'portrait', false)" />
+  <q-bar class="bg-primary">Portrait (Face only, transparent background)</q-bar>
+  <div class="imgGrid">
+    <div v-for="pic, index in files.filter(p => p.split('portrait').length > 1 && p.split('tportrait').length <= 1)" :key="index">
+      <CustomMedia :src="pic"></CustomMedia>
     </div>
-    <q-bar color="blue">Topless Portrait</q-bar>
-    <div class="imgGrid">
-        <div v-for="pic, index in files.filter(p => p.split('tportrait').length > 1)" :key="index">
-            <CustomMedia :src="pic"></CustomMedia>
-        </div>
-        <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'tportrait', false)" />
+    <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'portrait', false)" />
+  </div>
+  <q-bar class="bg-primary">Topless Portrait (Upper body, transparent background)</q-bar>
+  <div class="imgGrid">
+    <div v-for="pic, index in files.filter(p => p.split('tportrait').length > 1)" :key="index">
+      <CustomMedia :src="pic"></CustomMedia>
     </div>
-    <q-bar color="blue">Face</q-bar>
-    <div class="imgGrid">
-        <div v-for="pic, index in files.filter(p => p.split('face').length > 1)" :key="index">
-            <CustomMedia :src="pic"></CustomMedia>
-        </div>
-        <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'face', false)" />
+    <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'tportrait', false)" />
+  </div>
+  <q-bar class="bg-primary">Face (Face only)</q-bar>
+  <div class="imgGrid">
+    <div v-for="pic, index in files.filter(p => p.split('face').length > 1)" :key="index">
+      <CustomMedia :src="pic"></CustomMedia>
     </div>
-    <q-bar color="blue">Boobs</q-bar>
-    <div class="imgGrid">
-        <div v-for="pic, index in files.filter(p => p.split('boobs').length > 1)" :key="index">
-            <CustomMedia :src="pic"></CustomMedia>
-        </div>
-        <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'boobs')" />
+    <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'face', false)" />
+  </div>
+  <q-bar class="bg-primary">Boobs</q-bar>
+  <div class="imgGrid">
+    <div v-for="pic, index in files.filter(p => p.split('boobs').length > 1)" :key="index">
+      <CustomMedia :src="pic"></CustomMedia>
     </div>
-    <q-bar color="blue">Pussy</q-bar>
-    <div class="imgGrid">
-        <div v-for="pic, index in files.filter(p => p.split('pussy').length > 1)" :key="index">
-            <CustomMedia :src="pic"></CustomMedia>
-        </div>
-        <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'pussy')" />
+    <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'boobs')" />
+  </div>
+  <q-bar class="bg-primary">Pussy</q-bar>
+  <div class="imgGrid">
+    <div v-for="pic, index in files.filter(p => p.split('pussy').length > 1)" :key="index">
+      <CustomMedia :src="pic"></CustomMedia>
     </div>
-    <q-bar color="blue">Ass</q-bar>
-    <div class="imgGrid">
-        <div v-for="pic, index in files.filter(p => p.split('ass').length > 1)" :key="index">
-            <CustomMedia :src="pic"></CustomMedia>
-        </div>
-        <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'ass')" />
+    <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'pussy')" />
+  </div>
+  <q-bar class="bg-primary">Ass</q-bar>
+  <div class="imgGrid">
+    <div v-for="pic, index in files.filter(p => p.split('ass').length > 1)" :key="index">
+      <CustomMedia :src="pic"></CustomMedia>
     </div>
+    <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'ass')" />
+  </div>
 </template>
 <script>
 import { defineComponent } from 'vue'
 import CustomMedia from './CustomMedia.vue';
 
 export default defineComponent({
-    components: {
-        CustomMedia
-    },
-    emits: ['change'],
-    props: {
-        photos: Array,
-        folderPath: String
-    },
-    data: function () {
-        return {
-            currentFileAdd: null
-        }
-    },
-    computed: {
-        files() {
-            return this.photos;
-        }
-    },
-    methods: {
-        async addFile(e, bodyPart, inFolder = true) {
-            const file = this.currentFileAdd;
-            const data = await file.arrayBuffer();
-            var imgName = bodyPart + "" + this.photos.filter(p => p.split(bodyPart).length > 1).length + "." + file.name.split('.').slice(-1);
-            window.ipcRenderer.send('img:upload', { path: "packs/" + this.folderPath + (inFolder ? '/bodyparts' : '') + '/' + imgName, buffer: data });
-            this.$emit('change');
-        },
+  components: {
+    CustomMedia
+  },
+  emits: ['change'],
+  props: {
+    photos: Array,
+    folderPath: String
+  },
+  data: function () {
+    return {
+      currentFileAdd: null
     }
+  },
+  computed: {
+    files() {
+      return this.photos;
+    }
+  },
+  methods: {
+    async addFile(e, bodyPart, inFolder = true) {
+      const file = this.currentFileAdd;
+      const data = await file.arrayBuffer();
+      var imgName = bodyPart + "" + this.photos.filter(p => p.split(bodyPart).length > 1).length + "." + file.name.split('.').slice(-1);
+      window.ipcRenderer.send('img:upload', { path: "packs/" + this.folderPath + (inFolder ? '/bodyparts' : '') + '/' + imgName, buffer: data });
+      this.$emit('change');
+    },
+  }
 })
 </script>
 <style>
 .wrong {
-    outline: 3px red solid;
+  outline: 3px red solid;
 }
 
 .imgGrid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
 }
 
 img {
-    display: inline-block;
+  display: inline-block;
 }
 </style>
