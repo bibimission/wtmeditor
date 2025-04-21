@@ -54,9 +54,9 @@
 </template>
 <script>
 import { defineComponent } from 'vue'
-import HairColorPicker from './pickers/HairColorPicker.vue';
-import EyeColorPicker from './pickers/EyeColorPicker.vue';
-import BoobSizePicker from './pickers/BoobSizePicker.vue';
+import HairColorPicker from './selectors/HairColorPicker.vue';
+import EyeColorPicker from './selectors/EyeColorPicker.vue';
+import BoobSizePicker from './selectors/BoobSizePicker.vue';
 
 export default defineComponent({
   props: {

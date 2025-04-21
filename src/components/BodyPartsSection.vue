@@ -11,10 +11,10 @@
     </div>
     <div class="sidePanel">
       <q-select :options="bodypartOptions" label="bodypart" v-model="selectedBodyPart" @update:model-value="onChange"></q-select>
-      <q-select :options="moodOptions" label="mood" v-model="selectedMood" @update:model-value="onChange"></q-select>
-      <q-checkbox v-model="selectedHasCum" label="Cum covered" @change="onChange"></q-checkbox>
-      <q-checkbox v-model="selectedIsCreampie" label="Cum inside" @change="onChange"></q-checkbox>
-      <q-checkbox v-model="selectedHasButtPlug" label="Buttplug" @change="onChange" v-show="selectedBodyPart === 'ass'"></q-checkbox>
+      <q-select :options="moodOptions" clearable label="mood" v-model="selectedMood" @update:model-value="onChange"></q-select>
+      <q-checkbox v-model="selectedHasCum" label="Cum covered" @click="onChange"></q-checkbox>
+      <q-checkbox v-model="selectedIsCreampie" label="Cum inside" @click="onChange"></q-checkbox>
+      <q-checkbox v-model="selectedHasButtPlug" label="Buttplug" @click="onChange" v-show="selectedBodyPart === 'ass'"></q-checkbox>
     </div>
   </div>
 </template>
@@ -69,6 +69,7 @@ export default defineComponent({
     },
     onChange() {
       setTimeout(() => {
+        console.log(this.selectedHasCum)
         var newFileName = this.tmpFiles[this.selectedPicIndex].split('/').slice(0, -1).join('/')
           + '/' + this.selectedBodyPart
           + (this.selectedMood == undefined ? '' : '_' + this.selectedMood)
@@ -79,7 +80,7 @@ export default defineComponent({
           + "." + this.tmpFiles[this.selectedPicIndex].split(".").slice(-1);
         window.ipcRenderer.send('img:rename', { oldPath: this.tmpFiles[this.selectedPicIndex], newPath: newFileName });
         this.tmpFiles[this.selectedPicIndex] = newFileName;
-        this.$emit("change");
+        // this.$emit("change");
       }, 200);
     }
   },

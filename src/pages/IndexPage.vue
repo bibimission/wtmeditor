@@ -11,8 +11,8 @@
           <q-tab name="infos" icon="info" label="Infos" />
           <q-tab name="bodyparts" icon="person" label="Bodyparts" />
           <q-tab name="fullbody" icon="woman" label="Fullbody" />
-          <q-tab name="events" icon="school" label="Dates" />
-          <q-tab name="plannedEvents" icon="event" label="Events" />
+          <q-tab name="events" icon="event" label="Events" />
+          <q-tab name="clothing" icon="school" label="Clothes" />
           <q-tab name="photoshoots" icon="photo" label="Photoshoots" />
           <q-tab name="vids" icon="movie" label="Videos" />
         </q-tabs>
@@ -29,14 +29,14 @@
         </q-tab-panel>
 
         <q-tab-panel name="fullbody">
-          <FullBodySection :files="fullbodyFiles" @change="loadFolder"></FullBodySection>
+          <FullBodySection :photos="fullbodyFiles" @change="loadFolder"></FullBodySection>
         </q-tab-panel>
 
         <q-tab-panel name="events">
           <EventSection :files="eventFiles" :folderPath="folderPath"></EventSection>
         </q-tab-panel>
 
-        <q-tab-panel name="plannedEvents">
+        <q-tab-panel name="clothing">
           <ClothingSection :files="clothesFiles" :folderPath="folderPath"></ClothingSection>
         </q-tab-panel>
 

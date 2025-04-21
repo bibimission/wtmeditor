@@ -1,291 +1,110 @@
 <template>
-    <div>
-        <q-btn color="blue" v-for="pts, index in coputePhotoShootsNames" :key="index" @click="selectPhotoshoot($event, pts)">
-            {{ pts.split('/').slice(-1)[0] }}
-        </q-btn>
-    </div>
-    <q-btn @click="resetIds" color="orange" v-if="currentPhotoshoot != ''">Reset Image Ids</q-btn>
-    <div v-if="currentPhotoshoot != ''">
-        <div class="col imgContainer" :class="{ 'reduced': photoInEdit != '' }">
-            <div class="imgGrid">
-                <img v-for="img, index in computeCurrentPhotos" :key="index" :src="img" @click="imageClick($event, img)" :class="{ 'wrong': !isGoodFormat(img), 'selected': photoInEdit == img, 'cover': img.split('cover').length > 1 }" @dragstart="dragStart" @drop="dropped" @dragenter="cancelDefault" @dragover="cancelDefault" :name="img">
-                <q-spinner class="absolute-center" color="red" size="3em" v-if="isConverting" />
-            </div>
-            <img ref="samplePhoto" :src="computeCurrentPhotos[0]" class="hidden">
+  <div class="flex row">
+    <div class="mainPanel">
+      <q-bar class="bg-primary">Full body</q-bar>
+      <div class="imgGrid">
+        <div v-for="pic, index in tmpFiles" :key="index" @click="selectPic(index)" class="pic" :class="{ 'active': selectedPicIndex == index }">
+          <CustomMedia :src="pic"></CustomMedia>
         </div>
-        <div class="col editPanel" :class="{ 'reduced': photoInEdit == '' }">
-            <q-select v-model="photoType" label="Photo Type" :options="photoTypes" @update:model-value="onChange"></q-select>
-            <q-checkbox v-model="topless" label="Topless" color="teal" @update:model-value="onChange" />
-            <q-checkbox v-model="bottomless" label="Bottomless" color="teal" @update:model-value="onChange" />
-            <q-checkbox v-model="full" label="Fullbody" color="teal" @update:model-value="onChange" />
-            <fieldset>
-                <legend>Orientation : </legend>
-                <q-option-group v-model="orientation" :options="orientations" color="primary" @update:model-value="onChange" />
-            </fieldset>
-        </div>
+        <q-file filled v-model="currentFileAdd" label="Add +" stack-label @update:model-value="addFile($event, 'bodypart')" />
+      </div>
     </div>
-    <div v-if="currentPhotoshoot != ''">
-        <fieldset>
-            <legend>Photoshot Info</legend>
-            <q-input v-model="photoshootSource" @change="onInfoChange" label="Source" />
-            <q-input v-model="photoshootModder" @change="onInfoChange" label="Modder" />
-            <q-select @update:model-value="onInfoChange" v-model="photoshootTraits" label="Traits (Optional)" multiple :options="photoshootTraitsOptions" use-input use-chips input-debounce="0"></q-select>
-        </fieldset>
+    <div class="sidePanel">
+      <q-select :options="clothesOptions" label="Outfit" v-model="selectedOutfit" @update:model-value="onChange"></q-select>
     </div>
+  </div>
 </template>
 <script>
 import { defineComponent } from 'vue'
+import CustomMedia from './CustomMedia.vue';
 
 export default defineComponent({
-    props: {
-        files: Array
-    },
-    emits: ['change'],
-    data: function () {
-        return {
-            currentPhotoshoot: '',
-            currentPhotos: [],
-            photoInEdit: '',
-            isConverting: false,
-
-            draggedImg: '',
-
-            photoshootTraits: [],
-            photoshootSource: '',
-            photoshootModder: '',
-
-            photoshootTraitsOptions: [
-                'pta', 'office', 'classroom', 'academy'
-            ],
-
-            // In Edit
-            cover: false,
-            photoType: '',
-            photoTypes: [
-                { label: 'Clothed', value: 't0' },
-                { label: 'Lacks upper/lower', value: 't1' },
-                { label: 'Underwear/Swimsuit', value: 't2' },
-                { label: 'Transparent/Sexy clothing', value: 't22' },
-                { label: 'Nude', value: 't3' },
-                { label: 'Softcore (Masturbation/Spreading...)', value: 't4' },
-                { label: 'Sex', value: 't5' },
-                { label: 'Hardcore', value: 't6' },
-            ],
-            topless: false,
-            bottomless: false,
-            full: false,
-            orientation: 'hz',
-            orientations: [
-                { label: 'Horizontal', value: 'hz' },
-                { label: 'Vertical', value: 'vz' }
-            ],
-            id: 0
-        }
-    },
-    mounted: function () {
-    },
-    methods: {
-        selectPhotoshoot(e, pts) {
-            this.currentPhotoshoot = pts;
-            window.ipcRenderer.invoke('file:read', { path: pts + "/fullBodyConfig.ini" }).then((content) => {
-                var lines = content.split("\n");
-                lines.forEach(l => {
-                    if (l.split("tags =").length > 1) {
-                        this.photoshootTraits = l.split("tags")[1].trim().substring(1).trim().split(',');
-                    }
-                    if (l.split("source =").length > 1) {
-                        this.photoshootSource = l.split("source")[1].trim().substring(1).trim();
-                    }
-                    if (l.split("modder =").length > 1) {
-                        this.photoshootModder = l.split("modder")[1].trim().substring(1).trim();
-                    }
-                });
-            });
-        },
-        selectPhoto(img) {
-            console.log(img)
-            this.photoInEdit = img;
-            var tokens = img.split("/").slice(-1)[0].split('.')[0].split("_");
-
-            try {
-                this.id = parseInt(tokens[0], 10);
-                if (this.id > 1000) {
-                    this.id = this.currentPhotos.indexOf(img);
-                }
-            } catch (e) {
-                this.id = this.currentPhotos.indexOf(img);
-            }
-            this.topless = tokens.filter(f => f == 'tl').length > 0;
-            this.bottomless = tokens.filter(f => f == 'bl').length > 0;
-            this.full = tokens.filter(f => f == 'full').length > 0;
-
-            this.orientation = tokens.filter(f => f == 'hz').length > 0 ? 'hz' : 'vz';
-            var matchingType = this.photoTypes.find(t => tokens.includes(t.value));
-            if (matchingType != -1) {
-                this.photoType = matchingType;
-            }
-        },
-        onChange() {
-            if (this.photoInEdit != '') {
-                var newName = this.photoInEdit.split("/").slice(0, -1).join("/") + "/";
-                newName += this.id + "_"
-                    + this.photoType?.value + "_"
-                    + (this.cover ? 'cover_' : '')
-                    + (this.topless ? 'tl_' : '')
-                    + (this.bottomless ? 'bl_' : '')
-                    + (this.full ? 'full_' : '')
-                    + this.orientation + ".webp";
-                this.currentPhotos[this.currentPhotos.indexOf(this.photoInEdit)] = newName;
-                window.ipcRenderer.send('img:rename', { oldPath: this.photoInEdit, newPath: newName });
-                this.photoInEdit = newName;
-                this.$emit("change");
-            }
-        },
-        onInfoChange() {
-            var iniText = "[identity]\n";
-            iniText += "tags = " + this.photoshootTraits.join(", ") + "\n";
-            iniText += "[info]\n";
-            iniText += "source = " + this.photoshootSource + "\n";
-            iniText += "modder = " + this.photoshootModder + "\n";
-
-            window.ipcRenderer.send('file:write', { path: this.currentPhotoshoot + "/fullBodyConfig.ini", text: iniText })
-        },
-        imageClick(e, fp) {
-            if (!this.isGoodFormat(fp)) {
-                if (!this.isConverting) {
-                    this.isConverting = true;
-                    window.ipcRenderer.invoke('img:convert:webp', { img: fp }).then((newPath) => {
-                        console.log(newPath)
-                        if (newPath) {
-                            e.target.src = newPath;
-                            e.target.classList.remove('wrong')
-                        }
-                        this.isConverting = false;
-                    });
-                }
-            } else {
-                if (e.ctrlKey) {
-                    this.isConverting = true;
-                    window.ipcRenderer.invoke('img:remove-bg', { img: fp }).then((newPath) => {
-                        if (newPath) {
-                            e.target.src = newPath;
-                        }
-                        this.isConverting = false;
-                    });
-                } else {
-                    this.selectPhoto(fp);
-                }
-            }
-        },
-        isGoodFormat(fp) {
-            return fp.split(".")[1] == "webp";
-        },
-        dragStart(e) {
-            this.draggedImg = e.target.name;
-        },
-        dropped(e) {
-            if (e.target.tagName == 'IMG') {
-                var destImg = e.target.name;
-                var dragId = this.draggedImg.split("/").slice(-1)[0].split("_")[0];
-                var destId = destImg.split("/").slice(-1)[0].split("_")[0];
-                var dargNewName = this.draggedImg.split("/").slice(0, -1).join("/") + "/" + destId + "_" + this.draggedImg.split("/").slice(-1)[0].split(dragId)[1];
-                var destNewName = destImg.split("/").slice(0, -1).join("/") + "/" + dragId + "_" + destImg.split("/").slice(-1)[0].split(destId)[1];
-                window.ipcRenderer.send('img:rename', { oldPath: this.draggedImg, newPath: dargNewName });
-                window.ipcRenderer.send('img:rename', { oldPath: destImg, newPath: destNewName });
-
-                // On inverse les images
-                var newIndex = this.files.indexOf(this.draggedImg);
-                var oldIndex = this.files.indexOf(destImg);
-                this.files[newIndex] = dargNewName;
-                this.files[oldIndex] = destNewName;
-
-                this.$emit("change");
-            }
-            this.draggedImg = '';
-        },
-        cancelDefault(e) {
-            e.preventDefault()
-            e.stopPropagation()
-            return false
-        },
-        resetIds() {
-            this.computeCurrentPhotos.forEach((p, i) => {
-                var newName = p.split("/").slice(0, -1).join("/") + "/" + i + "_" + p.split("/").slice(-1)[0].split("_").slice(1).join("_");
-                window.ipcRenderer.send('img:rename', { oldPath: p, newPath: newName });
-            });
-        }
-    },
-    computed: {
-        coputePhotoShootsNames() {
-            return this.files.filter(function (p) {
-                if (p.includes("/fullbodies/")) {
-                    return p.split("/fullbodies/")[1].split("/").length == 1;
-                }
-                return false;
-            });
-        },
-        computeCurrentPhotos() {
-            if (this.currentPhotoshoot != '') {
-                var photos = this.files.filter(p => p.split(this.currentPhotoshoot).length > 1 && p != this.currentPhotoshoot && p.split(".")[1] != "ini")
-                    .sort((a, b) => {
-                        var tokensA = a.split("/").slice(-1)[0].split('.')[0].split("_");
-                        var tokensB = b.split("/").slice(-1)[0].split('.')[0].split("_");
-                        return parseInt(tokensA[0], 10) - parseInt(tokensB[0], 10);
-                    })
-                return photos;
-            }
-            return [];
-        }
+  components: {
+    CustomMedia
+  },
+  emits: ['change'],
+  props: {
+    photos: Array,
+    folderPath: String
+  },
+  data: function () {
+    return {
+      tmpFiles: [],
+      currentFileAdd: null,
+      clothesOptions: ['bare', 'bottomless', 'underwear', 'topless', 'clothed', 'shower', 'maid', 'nurse', 'work', 'uniform', 'athletic', 'swimsuit', 'bikini'],
+      selectedPicIndex: -1,
+      selectedOutfit: null,
+      selectedClotheLevel: null,
     }
+  },
+  computed: {
+    files() {
+      return this.photos;
+    }
+  },
+  methods: {
+    async addFile(e, bodyPart) {
+      const file = this.currentFileAdd;
+      const data = await file.arrayBuffer();
+      var imgName = bodyPart + "" + this.photos.filter(p => p.split(bodyPart).length > 1).length + "." + file.name.split('.').slice(-1);
+      window.ipcRenderer.send('img:upload', { path: "packs/" + this.folderPath + '/fullbody' + '/' + imgName, buffer: data });
+      this.$emit('change');
+    },
+    selectPic(index) {
+      this.selectedPicIndex = index
+      var tokens = this.tmpFiles[index].split('/').slice(-1)[0].split('_');
+      this.selectedOutfit = this.clothesOptions.find(t => this.tmpFiles[index].split(t).length > 1);
+    },
+    onChange() {
+      setTimeout(() => {
+        var newFileName = this.tmpFiles[this.selectedPicIndex].split('/').slice(0, -1).join('/')
+          + '/' + this.selectedOutfit
+          + "_" + (Math.floor(Math.random() * 2000))
+          + "." + this.tmpFiles[this.selectedPicIndex].split(".").slice(-1);
+        window.ipcRenderer.send('img:rename', { oldPath: this.tmpFiles[this.selectedPicIndex], newPath: newFileName });
+        this.tmpFiles[this.selectedPicIndex] = newFileName;
+        // this.$emit("change");
+      }, 200);
+    }
+  },
+  mounted() {
+    this.tmpFiles = this.files
+  },
+  watch: {
+    files(newV) {
+      this.tmpFiles = newV
+    }
+  }
 })
 </script>
-<style scoped>
-.col {
-    display: inline-block;
-    vertical-align: top;
+<style>
+.wrong {
+  outline: 3px red solid;
 }
 
 .imgGrid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
 }
 
-
-.imgContainer.reduced {
-    width: 80%
+img {
+  display: inline-block;
 }
 
-.imgContainer {
-    width: 100%;
-    transition: all ease 0.5s;
+.pic {}
+
+.pic.active {
+  border: solid 3px lightblue;
 }
 
-.editPanel {
-    background-color: lightcoral;
-    width: 20%;
-    transform: scale(1);
-    transition: all ease 0.5s;
-    position: fixed;
-    right: 0;
+.mainPanel {
+  width: 75vw;
 }
 
-.editPanel.reduced {
-    width: 0%;
-    transform: scale(0);
-}
-
-img.selected {
-    outline: solid 5px skyblue;
-}
-
-img.cover {
-    border: solid 3px yellow;
-}
-
-[draggable="true"] {
-    user-select: none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
+.sidePanel {
+  width: 20vw;
+  background-color: lightpink;
+  height: 100%;
+  color: black;
 }
 </style>
