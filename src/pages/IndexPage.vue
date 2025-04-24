@@ -2,7 +2,7 @@
   <q-page class="flex">
     <div class="header">
       <div class="loadDiv row">
-        <q-input v-model="folderPath" label="Girl Name" class="col-6"/>
+        <q-input v-model="folderPath" label="Girl Name" class="col-6" />
         <q-btn @click="loadFolder" glossy color="green" class="h-fit">Load</q-btn>
         <q-btn @click="createFolder" glossy color="purple" class="h-fit">Create</q-btn>
       </div>
@@ -130,8 +130,8 @@ export default defineComponent({
       return this.videos;
     }
   },
-  mounted(){
-    window.ipcRenderer.invoke('api:getAll', { }).then((girlList) => {
+  mounted() {
+    window.ipcRenderer.invoke('api:getAll', {}).then((girlList) => {
       this.apiGirls = girlList
     })
   }
@@ -148,7 +148,7 @@ export default defineComponent({
 
 .flex {
   display: flex;
-  align-content: start;
+  align-content: flex-start;
 }
 
 .loadDiv {
@@ -158,7 +158,7 @@ export default defineComponent({
   padding: 1vh 0;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0,0,0,0.2);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .tabHead {
@@ -166,11 +166,13 @@ export default defineComponent({
   margin: auto;
   height: fit-content;
 }
-.tabContent{
+
+.tabContent {
   width: 100%;
   height: fit-content;
 }
-.q-tab--active{
+
+.q-tab--active {
   color: white;
   background-color: var(--color-second);
 }
