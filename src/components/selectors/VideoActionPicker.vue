@@ -108,7 +108,7 @@ export default {
           totalTags.push(boobs.value)
         }
         if (hands != null) {
-          totalTags.push(handsvalue)
+          totalTags.push(hands.value)
         }
         if (pussy != null) {
           totalTags.push(pussy.value)

@@ -59,7 +59,7 @@ export default defineComponent({
         this.videoName = this.removeDigits(this.videoName)
         var tokens = this.videoName.split('.')[0].split('_');
         tokens.forEach((t) => {
-            this.videoTags.push(t)
+          this.videoTags.push(t)
         })
         this.videoMainAction = this.videoTags[0]
         this.videoActions = this.$refs.actionPicker.parseTags(this.videoTags, false)
@@ -75,7 +75,7 @@ export default defineComponent({
       setTimeout(() => {
         var newFileName = this.computeVideos[this.videoInEdit].split('/').slice(0, -1).join('/') + '/'
           + this.videoMainAction
-          + (this.videoClothing.length > 0 ? (',' + this.videoClothing.join(",")) : '')
+          + (this.videoClothing.length > 0 ? ('_' + this.videoClothing.join("_")) : '')
           + (Math.floor(Math.random() * 2000)) + "." + this.computeVideos[this.videoInEdit].split(".").slice(-1);
         window.ipcRenderer.send('img:rename', { oldPath: this.computeVideos[this.videoInEdit], newPath: newFileName });
         this.actualVideos[this.videoInEdit] = newFileName;
