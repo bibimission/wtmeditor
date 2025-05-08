@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { readdir } = require("fs").promises;
-const GIRLS_BASE_PATH = "packs";
+const GIRLS_BASE_PATH = "packsCA";
 
 import ImageTool from "./imageTool";
 

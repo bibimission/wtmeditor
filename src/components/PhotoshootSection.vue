@@ -21,7 +21,7 @@
       <q-checkbox v-model="faceless" label="Faceless" color="teal" @update:model-value="onChange" />
       <q-checkbox v-model="closeup" label="Closeup" color="teal" @update:model-value="onChange" />
 
-      <PhotoshootActionPicker v-model="photoTags" @update:model-value="onChange"></PhotoshootActionPicker>
+      <PhotoshootActionPicker v-model="photoTags" @update:model-value="onChange" ref="actionPicker"></PhotoshootActionPicker>
 
       <q-bar class="bg-primary">Orientation</q-bar>
       <q-option-group v-model="orientation" :options="orientations" color="primary" @update:model-value="onChange" />
@@ -146,9 +146,9 @@ export default defineComponent({
       this.closeup = subTags.filter(f => f == 'closeup').length > 0;
       this.cover = tokens.filter(f => f == 'cover').length > 0;
 
-      this.photoTags = tokens
+      this.photoTags = this.$refs.actionPicker.parse(tokens)
 
-      this.orientation = tokens.filter(f => f == 'vert').length > 0 ? 'vert' : '';
+      // this.orientation = tokens.filter(f => f == 'vert').length > 0 ? 'vert' : '';
       this.photoType = ''
       var matchingType = this.clothingLevelOptions.find(t => tokens.includes(t.value));
       if (matchingType != undefined) {
@@ -167,7 +167,7 @@ export default defineComponent({
           + (this.faceless ? ',noface' : '')
           + (this.closeup ? ',closeup' : '')
           + (this.cover ? ',cover' : '')
-          + (this.photoTags.length > 0 ? (',' + this.photoTags.join(',')) : '')
+          + (this.photoTags.length > 0 ? (',' + this.$tools.distinct(this.photoTags).join(',')) : '')
           + (this.orientation === 'vert' ? ',vert' : '') + ".webp";
         this.currentPhotos[this.currentPhotos.indexOf(this.photoInEdit)] = newName;
         window.ipcRenderer.send('img:rename', { oldPath: this.photoInEdit, newPath: newName });
@@ -192,6 +192,11 @@ export default defineComponent({
           });
         }
       } else {
+        if (e.target.width < e.target.height) {
+          this.orientation = 'vert'
+        } else {
+          this.orientation = ''
+        }
         this.selectPhoto(fp);
       }
     },

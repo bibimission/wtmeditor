@@ -151,6 +151,16 @@ export default {
         totalTags.push(this.assAction.value)
       }
       this.$emit('update:modelValue', totalTags)
+    },
+    parse(tokens) {
+      return tokens.filter(t =>
+        (this.partyOptions.find(o => o.value === t) != null) ||
+        (this.mouthOptions.find(o => o.value === t) != null) ||
+        (this.boobsOptions.find(o => o.value === t) != null) ||
+        (this.handsOptions.find(o => o.value === t) != null) ||
+        (this.pussyOptions.find(o => o.value === t) != null) ||
+        (this.assOptions.find(o => o.value === t) != null)
+      )
     }
   },
   watch: {
