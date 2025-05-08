@@ -1,9 +1,9 @@
 <template>
   <div class="pickerBody">
-    <q-bar class="bg-primary">Girl mood</q-bar>
+    <q-bar class="bg-primary">Girl job</q-bar>
     <div class="selectRow">
-      <div v-for="(o, i) in options" :key="i" class="vignette" :class="{ 'active': o == moodPicked || (o == 'none' && moodPicked == '') }" @click="selectValue(o)">
-        <img :src="'/img/mood/' + o + '.png'">
+      <div v-for="(o, i) in options" :key="i" class="vignette" :class="{ 'active': o == jobPicked || (o == 'none' && jobPicked == '') }" @click="selectValue(o)">
+        <img :src="'/img/job/' + o + '.png'">
       </div>
     </div>
   </div>
@@ -16,18 +16,18 @@ export default {
   emits: ['update:modelValue'],
   data() {
     return {
-      moodPicked: '',
-      options: ['none', 'happy', 'neutral', 'sad']
+      jobPicked: '',
+      options: ['none', 'waitress', 'dancer', 'masseuse', 'geisha']
     }
   },
   methods: {
     selectValue(v) {
       if (v === 'none') {
-        this.moodPicked = ''
+        this.jobPicked = ''
       } else {
-        this.moodPicked = v
+        this.jobPicked = v
       }
-      this.$emit('update:modelValue', this.moodPicked)
+      this.$emit('update:modelValue', this.jobPicked)
     },
     parse(name) {
       return this.options.find(o => name.split(o).length > 1)
@@ -35,7 +35,7 @@ export default {
   },
   watch: {
     modelValue(newV) {
-      this.moodPicked = newV
+      this.jobPicked = newV
     }
   }
 }
@@ -55,6 +55,7 @@ export default {
   border-radius: 1vh;
   overflow: hidden;
   margin: 0 0.3vw;
+  background-color: white;
 }
 
 .vignette img {

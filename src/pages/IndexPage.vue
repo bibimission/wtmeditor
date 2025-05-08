@@ -9,11 +9,6 @@
       <div class="tabHead">
         <q-tabs v-model="tab">
           <q-tab name="infos" icon="info" label="Infos" />
-          <q-tab name="bodyparts" icon="person" label="Bodyparts" />
-          <q-tab name="fullbody" icon="woman" label="Fullbody" />
-          <q-tab name="events" icon="school" label="Dates" />
-          <q-tab name="plannedEvents" icon="event" label="Events" />
-          <q-tab name="photoshoots" icon="photo" label="Photoshoots" />
           <q-tab name="vids" icon="movie" label="Videos" />
         </q-tabs>
       </div>
@@ -22,26 +17,6 @@
       <q-tab-panels v-model="tab" animated class="bg-white text-white">
         <q-tab-panel name="infos">
           <GirlInfoForm v-model="girlInfos" @change="saveGirl" ref="girlInfoForm"></GirlInfoForm>
-        </q-tab-panel>
-
-        <q-tab-panel name="bodyparts">
-          <BodyPartsSection :photos="bodyPhotos" :folderPath="folderPath" @change="loadFolder"></BodyPartsSection>
-        </q-tab-panel>
-
-        <q-tab-panel name="fullbody">
-          <FullBodySection :files="fullbodyFiles" @change="loadFolder"></FullBodySection>
-        </q-tab-panel>
-
-        <q-tab-panel name="events">
-          <EventSection :files="eventFiles" :folderPath="folderPath"></EventSection>
-        </q-tab-panel>
-
-        <q-tab-panel name="plannedEvents">
-          <PlannedEventSection :files="plannedEventFiles" :folderPath="folderPath" :apiGirls="apiGirls"></PlannedEventSection>
-        </q-tab-panel>
-
-        <q-tab-panel name="photoshoots">
-          <PhotoshootSection :files="photoshootFiles" @change="loadFolder"></PhotoshootSection>
         </q-tab-panel>
 
         <q-tab-panel name="vids">
@@ -55,23 +30,13 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import GirlInfoForm from 'components/GirlInfoForm.vue'
-import BodyPartsSection from 'src/components/BodyPartsSection.vue'
 import VideosSection from 'src/components/VideosSection.vue'
-import PhotoshootSection from 'src/components/PhotoshootSection.vue'
-import EventSection from 'src/components/EventSection.vue'
-import FullBodySection from 'src/components/FullBodySection.vue'
-import PlannedEventSection from 'src/components/PlannedEventSection.vue'
 
 export default defineComponent({
   name: 'IndexPage',
   components: {
     GirlInfoForm,
-    BodyPartsSection,
-    VideosSection,
-    PhotoshootSection,
-    EventSection,
-    FullBodySection,
-    PlannedEventSection
+    VideosSection
   },
   setup() {
     return {
@@ -83,20 +48,9 @@ export default defineComponent({
       folderPath: "",
       girlInfos: {
         first_name: "",
-        last_name: "",
-        traits: [],
-        source: "",
-        modder: "",
-        sensitive_area: ""
+        last_name: ""
       },
-      bodyPhotos: [],
-      videos: [],
-      photoshootFiles: [],
-      eventFiles: [],
-      fullbodyFiles: [],
-      plannedEventFiles: [],
-
-      apiGirls: []
+      medias: []
     }
   },
   methods: {
@@ -107,13 +61,7 @@ export default defineComponent({
         if (this.$refs.girlInfoForm) {
           this.$refs.girlInfoForm.load(data.infos);
         }
-
-        this.bodyPhotos = data.files.filter(f => f.split('/bodyparts/').length > 1 || f.split(this.folderPath + '/face').length > 1 || f.split(this.folderPath + '/portrait').length > 1 || f.split(this.folderPath + '/tportrait').length > 1);
-        this.videos = data.files.filter(f => f.split('/vids/').length > 1);
-        this.photoshootFiles = data.files.filter(f => f.split('/photoshoots/').length > 1);
-        this.eventFiles = data.files.filter(f => f.split('/events/').length > 1);
-        this.plannedEventFiles = data.files.filter(f => f.split('/plannedEvents/').length > 1);
-        this.fullbodyFiles = data.files.filter(f => f.split('/fullbodies/').length > 1);
+        this.medias = data.files.filter(f => f.split('.ini').length <= 1);
       });
     },
     createFolder() {
@@ -127,13 +75,8 @@ export default defineComponent({
   },
   computed: {
     computeVideos() {
-      return this.videos;
+      return this.medias;
     }
-  },
-  mounted() {
-    window.ipcRenderer.invoke('api:getAll', {}).then((girlList) => {
-      this.apiGirls = girlList
-    })
   }
 })
 </script>

@@ -3,6 +3,7 @@
     <div>
       <q-bar class="bg-primary">Action</q-bar>
       <div>
+        <q-select label="Global" :options="globalOptions" v-model="globalAction" clearable @update:model-value="onChange"></q-select>
         <q-select label="Mouth" :options="mouthOptions" v-model="mouthAction" clearable @update:model-value="onChange"></q-select>
         <q-select label="Boobs" :options="boobsOptions" v-model="boobsAction" clearable @update:model-value="onChange"></q-select>
         <q-select label="Hands" :options="handsOptions" v-model="handsAction" clearable @update:model-value="onChange"></q-select>
@@ -23,43 +24,73 @@ export default {
   emits: ['update:modelValue'],
   data() {
     return {
+      globalOptions: [
+        { label: 'Strip', value: 'strip' },
+        { label: 'Sing', value: 'sing' },
+        { label: 'Fight', value: 'fight' },
+        { label: 'Rest', value: 'rest' },
+        { label: 'Libido training', value: 'libido' },
+        { label: 'Sensitivity training', value: 'sensitivity' },
+        { label: 'Obedience training', value: 'obedience' },
+        { label: 'Constitution training', value: 'constitution' },
+        { label: 'Watersports (pee)', value: 'watersports' },
+      ],
       // Bodyparts actions
       mouthOptions: [
-        { label: 'Kiss', value: 'kissing' },
+        { label: 'Kiss', value: 'kiss' },
+        { label: 'Blowjob/Oral', value: 'service oral' },
+        { label: 'Deepthroat', value: 'deep' },
+        { label: 'Sixtynine', value: 'sixty-nine' },
+        { label: 'Gag', value: 'gag' },
+        { label: 'Rimjob', value: 'rimming' },
+        { label: 'Cumshot', value: 'cumshot on-face' },
+        { label: 'Cum in hair', value: 'cumshot in-hair' },
+        { label: 'Creampie', value: 'cumshot in-mouth' },
+        { label: 'Swallowing', value: 'cumshot swallowing' },
+        { label: 'Bukkake', value: 'bukkake' },
+        { label: 'Cum shower', value: 'cum-shower' },
         { label: 'Orgasm', value: 'orgasm' },
-        { label: 'Facefuck', value: 'useface' },
-        { label: 'Cumshot', value: 'facial' },
+        { label: 'Denied Orgasm', value: 'denied' },
       ],
       boobsOptions: [
-        { label: 'Get Groped', value: 'gropeboob' },
-        { label: 'Get Pinched', value: 'pinch' },
-        { label: 'Get Slapped', value: 'slapboobs' },
+        { label: 'Fondle', value: 'fondle' },
+        { label: 'Grope', value: 'grope' },
+        { label: 'Titjob', value: 'titjob' },
+        { label: 'Lactation', value: 'lactation' },
+        { label: 'Cumshot', value: 'cumshot on-body' },
       ],
       handsOptions: [
-        { label: 'Masturbate', value: 'masturbation' },
+        { label: 'Masturbate', value: 'masturbate' },
+        { label: 'Handjob', value: 'service handjob' },
       ],
       pussyOptions: [
-        { label: 'Get groped', value: 'gropepussy' },
-        { label: 'Wedgie', value: 'wedgie' },
-        { label: 'Inner thigh', value: 'innerthigh' },
-        { label: 'Get teased', value: 'teaseclit' },
-        { label: 'Get Fingered', value: 'fingerpussy' },
-        { label: 'Get licked', value: 'lickpussy' },
-        { label: 'Fuck', value: 'fuckpussy' },
-        { label: 'Creampie', value: 'creampie_pussy' },
+        { label: 'Fingering', value: 'finger' },
+        { label: 'Dildo', value: 'dildo' },
+        { label: 'Cunnilingus', value: 'cunnilingus' },
+        { label: 'Doggy', value: 'sex doggy' },
+        { label: 'Cowgirl', value: 'sex cowgirl' },
+        { label: 'Missionary', value: 'sex missionary' },
+        { label: 'Piledriver', value: 'sex piledriver' },
+        { label: 'Spooning', value: 'sex spooning' },
+        { label: 'DP', value: 'double' },
+        { label: 'Fetish', value: 'fetish' },
+        { label: 'Creampie', value: 'creampie' },
+        { label: 'Squirt', value: 'squirt' },
       ],
       assOptions: [
-        { label: 'Get groped', value: 'gropeass' },
-        { label: 'Get teased', value: 'teaseass' },
-        { label: 'Get Spanked', value: 'spank' },
-        { label: 'Get Slapped', value: 'slapass' },
-        { label: 'Get Fingered', value: 'fingerass' },
-        { label: 'Fuck', value: 'fuckass' },
-        { label: 'Creampie', value: 'creampie_anal' },
+        { label: 'Plug', value: 'plug' },
+        { label: 'Fisting', value: 'fisting' },
+        { label: 'Doggy', value: 'anal doggy' },
+        { label: 'Cowgirl', value: 'anal cowgirl' },
+        { label: 'Missionary', value: 'anal missionary' },
+        { label: 'Piledriver', value: 'anal piledriver' },
+        { label: 'Spooning', value: 'anal spooning' },
+        { label: 'Creampie', value: 'creampie' },
       ],
 
       // Values
 
+      globalAction: null,
       mouthAction: null,
       boobsAction: null,
       handsAction: null,
@@ -70,6 +101,9 @@ export default {
   methods: {
     onChange() {
       var totalTags = []
+      if (this.globalAction != null) {
+        totalTags.push(this.globalAction.value)
+      }
       if (this.mouthAction != null) {
         totalTags.push(this.mouthAction.value)
       }
@@ -87,13 +121,15 @@ export default {
       }
       this.$emit('update:modelValue', totalTags)
     },
-    parseTags(tags, setValue = true) {
-      var mouth = this.mouthOptions.find(t => tags.includes(t.value))
-      var boobs = this.boobsOptions.find(t => tags.includes(t.value))
-      var hands = this.handsOptions.find(t => tags.includes(t.value))
-      var pussy = this.pussyOptions.find(t => tags.includes(t.value))
-      var ass = this.assOptions.find(t => tags.includes(t.value))
+    parseTags(videoName, setValue = true) {
+      var glob = this.globalOptions.find(t => videoName.split(t.value).length > 1)
+      var mouth = this.mouthOptions.find(t => videoName.split(t.value).length > 1)
+      var boobs = this.boobsOptions.find(t => videoName.split(t.value).length > 1)
+      var hands = this.handsOptions.find(t => videoName.split(t.value).length > 1)
+      var pussy = this.pussyOptions.find(t => videoName.split(t.value).length > 1)
+      var ass = this.assOptions.find(t => videoName.split(t.value).length > 1)
       if (setValue) {
+        this.globalAction = glob
         this.mouthAction = mouth
         this.boobsAction = boobs
         this.handsAction = hands
@@ -101,6 +137,9 @@ export default {
         this.assAction = ass
       } else {
         var totalTags = []
+        if (glob != null) {
+          totalTags.push(glob.value)
+        }
         if (mouth != null) {
           totalTags.push(mouth.value)
         }
@@ -122,7 +161,7 @@ export default {
   },
   watch: {
     modelValue(newV) {
-      this.parseTags(newV)
+      this.parseTags(newV.join(' '))
     }
   }
 }

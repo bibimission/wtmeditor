@@ -1,9 +1,9 @@
 <template>
   <div class="pickerBody">
-    <q-bar class="bg-primary">Girl mood</q-bar>
+    <q-bar class="bg-primary">Girl outfit</q-bar>
     <div class="selectRow">
-      <div v-for="(o, i) in options" :key="i" class="vignette" :class="{ 'active': o == moodPicked || (o == 'none' && moodPicked == '') }" @click="selectValue(o)">
-        <img :src="'/img/mood/' + o + '.png'">
+      <div v-for="(o, i) in options" :key="i" class="vignette" :class="{ 'active': o == outfitPicked || (o == 'none' && outfitPicked == '') }" @click="selectValue(o)">
+        <img :src="'/img/outfit/' + o + '.png'">
       </div>
     </div>
   </div>
@@ -16,18 +16,18 @@ export default {
   emits: ['update:modelValue'],
   data() {
     return {
-      moodPicked: '',
-      options: ['none', 'happy', 'neutral', 'sad']
+      outfitPicked: '',
+      options: ['none', 'naked', 'cosplay', 'maid', 'bunny', 'swim', 'kimono', 'bondage']
     }
   },
   methods: {
     selectValue(v) {
       if (v === 'none') {
-        this.moodPicked = ''
+        this.outfitPicked = ''
       } else {
-        this.moodPicked = v
+        this.outfitPicked = v
       }
-      this.$emit('update:modelValue', this.moodPicked)
+      this.$emit('update:modelValue', this.outfitPicked)
     },
     parse(name) {
       return this.options.find(o => name.split(o).length > 1)
@@ -35,7 +35,7 @@ export default {
   },
   watch: {
     modelValue(newV) {
-      this.moodPicked = newV
+      this.outfitPicked = newV
     }
   }
 }
@@ -44,11 +44,12 @@ export default {
 .pickerBody {
   width: fit-content;
   height: fit-content;
+  max-width: 20vw;
 }
 
 .selectRow {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .vignette {
@@ -60,6 +61,7 @@ export default {
 .vignette img {
   display: block;
   max-width: 3vw;
+  height: auto;
 }
 
 .vignette.active {

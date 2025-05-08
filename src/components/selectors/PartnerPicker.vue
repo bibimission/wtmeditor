@@ -1,9 +1,9 @@
 <template>
   <div class="pickerBody">
-    <q-bar class="bg-primary">Girl mood</q-bar>
+    <q-bar class="bg-primary">Special partners</q-bar>
     <div class="selectRow">
-      <div v-for="(o, i) in options" :key="i" class="vignette" :class="{ 'active': o == moodPicked || (o == 'none' && moodPicked == '') }" @click="selectValue(o)">
-        <img :src="'/img/mood/' + o + '.png'">
+      <div v-for="(o, i) in options" :key="i" class="vignette" :class="{ 'active': o == partnerPicked || (o == 'none' && partnerPicked == '') }" @click="selectValue(o)">
+        <img :src="'/img/partner/' + o + '.png'">
       </div>
     </div>
   </div>
@@ -16,18 +16,18 @@ export default {
   emits: ['update:modelValue'],
   data() {
     return {
-      moodPicked: '',
-      options: ['none', 'happy', 'neutral', 'sad']
+      partnerPicked: '',
+      options: ['none', 'lesbian', 'bisexual', 'group', 'big', 'beast', 'machine', 'monster']
     }
   },
   methods: {
     selectValue(v) {
       if (v === 'none') {
-        this.moodPicked = ''
+        this.partnerPicked = ''
       } else {
-        this.moodPicked = v
+        this.partnerPicked = v
       }
-      this.$emit('update:modelValue', this.moodPicked)
+      this.$emit('update:modelValue', this.partnerPicked)
     },
     parse(name) {
       return this.options.find(o => name.split(o).length > 1)
@@ -35,7 +35,7 @@ export default {
   },
   watch: {
     modelValue(newV) {
-      this.moodPicked = newV
+      this.partnerPicked = newV
     }
   }
 }
@@ -47,8 +47,8 @@ export default {
 }
 
 .selectRow {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .vignette {

@@ -1,5 +1,5 @@
 <template>
-  <div @click="imageClick($event)" :class="{ 'wrong': computeNeedConversion, 'tiny': isTiny }" class="p-relative">
+  <div @click="imageClick($event)" :class="{ 'wrong': computeNeedConversion, 'tiny': isTiny }" class="p-relative parent">
     <img :src="computeSrc" v-if="computeMediaType == 'img'" loading="lazy">
     <video :src="computeSrc" v-if="computeMediaType == 'video'" muted @mouseover="onHover($event)" ref="videoPlayer" @loadeddata="onLoad($event)" loading="lazy" loop autoplay></video>
     <div class="overlay absolute-center" :class="{ 'hidden': !isConverting }">
@@ -125,6 +125,11 @@ export default defineComponent({
 })
 </script>
 <style>
+.parent {
+  width: 100%;
+  height: 100%;
+}
+
 .wrong {
   outline: 5px red solid;
 }
@@ -176,5 +181,7 @@ img,
 video {
   margin: auto;
   display: block;
+  max-width: 100%;
+  max-height: 100%;
 }
 </style>
