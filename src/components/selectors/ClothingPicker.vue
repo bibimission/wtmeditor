@@ -54,6 +54,7 @@ export default {
   },
   methods: {
     onClick(clothes, region) {
+      this.selectedClothes[region] = this.selectedClothes[region].filter(s => s != 'bare' && s != 'nobot' && s != 'notop')
       if (clothes != 'none' && clothes != 'unset') {
         this.selectedClothes[region] = this.selectedClothes[region].filter(t => t != 'none' && t != 'unset')
         if (this.selectedClothes[region].includes(clothes)) {
@@ -86,12 +87,8 @@ export default {
 
       if (nakedBot && nakedTop) {
         this.$emit('update:modelValue', ['bare'])
-      } else if (nakedBot) {
-        this.$emit('update:modelValue', ['nobot'])
-      } else if (nakedTop) {
-        this.$emit('update:modelValue', ['notop'])
       } else {
-        this.$emit('update:modelValue', tops.concat(bots.concat(feet)))
+        this.$emit('update:modelValue', tops.concat(bots.concat(feet)).filter(t => t != 'none'))
       }
     },
     parseTags(tags, setValue = true) {

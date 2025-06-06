@@ -160,11 +160,11 @@ export default defineComponent({
       if (girlObject.area_sensitivity != undefined) {
         this.area_sensitivity = girlObject.area_sensitivity;
       }
-      let tmpTraits = girlObject.traits;
+      let tmpTraits = girlObject.traits.filter(t => t != null);
       this.hair_color = tmpTraits.find(i => i.split('_hair').length > 1)
       this.boob_size = tmpTraits.find(i => i.split('_boobs').length > 1)
       this.eyes_color = tmpTraits.find(i => i.split('_eyes').length > 1)
-      let finalTraits = girlObject.traits.filter(i => i.split('_eyes').length == 1 && i.split('_hair').length == 1 && i.split('_boobs').length == 1)
+      let finalTraits = tmpTraits.filter(i => i.split('_eyes').length == 1 && i.split('_hair').length == 1 && i.split('_boobs').length == 1)
       this.traits = finalTraits
     }
   },

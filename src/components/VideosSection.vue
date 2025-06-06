@@ -97,23 +97,23 @@ export default defineComponent({
         this.activeParties = []
         this.videoName = this.computeVideos[this.videoInEdit].split('/').slice(-1)[0]
         this.videoName = this.removeDigits(this.videoName)
-        var tokens = this.videoName.split('.')[0].split(',');
-        tokens.forEach((t) => {
-          if (t.split('-').length > 1) {
-            this.videoTags.push(t.split('-')[0])
-            this.videoTags.push(t.split('-')[1])
-          } else {
+
+        var tokens = this.videoName.split('.')[0].split('-');
+        var mainActions = tokens[0].split(',')
+
+        if (tokens.length > 1) {
+          tokens[1].split(',').forEach((t) => {
             this.videoTags.push(t)
-          }
-        })
-        this.videoMainAction = this.videoTags[0]
+          })
+        }
+        this.videoMainAction = mainActions[0]
         if (this.videoMainAction.split('gloryhole').length > 1) {
           this.videoMainAction = this.videoMainAction.split('_').slice(1, 50).join('_')
           this.videoTags.push('glory_hole')
           this.videoTags.push(this.videoMainAction)
         }
         this.videoMood = this.$refs.moodPicker.parse(this.videoTags)
-        this.videoActions = this.$refs.actionPicker.parseTags(this.videoTags, false)
+        this.videoActions = this.$refs.actionPicker.parseTags(mainActions, false)
         this.videoClothing = this.$refs.clothesPicker.parseTags(this.videoTags, false)
         this.videoPlace = this.placeOptions.find(p => this.videoTags.includes(p.value))
         var parties = this.partyOptions.filter(p => this.videoTags.includes(p.value))
@@ -132,14 +132,26 @@ export default defineComponent({
     },
     onChange() {
       setTimeout(() => {
+        var subTags = []
         var newFileName = this.computeVideos[this.videoInEdit].split('/').slice(0, -1).join('/') + '/'
           + (this.videoPlace?.value == 'glory_hole' ? 'gloryhole_' : '')
           + this.videoMainAction
-          + (this.videoClothing.length > 0 ? (',' + this.videoClothing.join(",")) : '')
-          + (this.activeParties[0] != '' ? (',' + this.activeParties.join(",")) : '')
-          + (this.videoMood != null ? (',' + this.videoMood) : '')
-          + (this.videoPlace != null ? (',' + (this.videoPlace.value != 'glory_hole' ? this.videoPlace.value : '')) : '')
-          + (Math.floor(Math.random() * 2000)) + "." + this.computeVideos[this.videoInEdit].split(".").slice(-1);
+        if (this.videoClothing.length > 0) {
+          subTags = subTags.concat(this.videoClothing)
+        }
+        if (this.activeParties[0] != '') {
+          subTags = subTags.concat(this.activeParties)
+        }
+        if (this.videoMood != null) {
+          subTags.push(this.videoMood)
+        }
+        if (this.videoPlace != null && this.videoPlace.value != 'glory_hole') {
+          subTags.push(this.videoPlace.value)
+        }
+        if (subTags.length > 0) {
+          newFileName += '-' + subTags.join(',')
+        }
+        newFileName += (Math.floor(Math.random() * 2000)) + "." + this.computeVideos[this.videoInEdit].split(".").slice(-1);
         window.ipcRenderer.send('img:rename', { oldPath: this.computeVideos[this.videoInEdit], newPath: newFileName });
         this.actualVideos[this.videoInEdit] = newFileName;
         this.imageChanged()

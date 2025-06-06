@@ -3,7 +3,7 @@
     <q-header elevated>
       <q-toolbar class="glossy">
         <q-toolbar-title>
-          WTM Editor
+          Corrupted Academy Editor
         </q-toolbar-title>
       </q-toolbar>
     </q-header>

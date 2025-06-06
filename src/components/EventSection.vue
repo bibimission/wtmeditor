@@ -3,6 +3,7 @@
         <q-btn color="blue" v-for="pts, index in computeEventsNames" :key="index" @click="selectEvent($event, pts)">
             {{ pts.split('/').slice(-1)[0] }}
         </q-btn>
+        <q-btn color="green" glossy>create +</q-btn>
     </div>
     <div class="eventElements col" v-if="currentEvent != ''">
         <div v-for="el, index in computeEventElements" :key="index" class="elRow">
