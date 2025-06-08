@@ -1,0 +1,31 @@
+{
+    "name": "a_cole_day_indeed",
+    "display_name": "A Cole Day Indeed",
+    "event_type": ["home", "office"],
+    "requirements": "False",
+    "requirement_description": "The above is a fake requirement, a real one would look like 'girl.corruption + girl.affection >= 10 and time_manager.hour > 10 and time_manager.hour < 19'",
+    "min_chance_to_happen": 15,
+    "max_chance_to_happen": 50,
+    "chance_to_happen_calculation": {
+        "action_requirements": {
+            "corruption": 5, 
+            "affection": 5
+        },
+        "accept_influences": {
+            "corruption": {"weight": 0.45}, 
+            "affection": {"weight": 0.4}, 
+            "fear": {"weight": -0.1}
+        }
+    },
+    "stages": ["a_cole_day_indeed"],
+    "one_time_event": true,
+    "impacts": {
+        "participants": {
+            "impacts": {
+                "corruption": [2000, 3500], "naturism":  [2000, 3500], "affection":  [2000, 3500], "fear": [-3500, -2000]
+            }
+        }
+    },
+    "reset_outfit_when_finished": true,
+    "hide_in_menus": true
+}

@@ -66,7 +66,7 @@ export default defineComponent({
         cost: 0,
         shoot_subtype: '',
         description: '',
-        requirements: '',
+        requirements: '', // On vire ça fait bugger
         requirement_description: '',
         participant_ids: []
       },
@@ -96,6 +96,7 @@ export default defineComponent({
       bottomless: false,
       faceless: false,
       closeup: false,
+      mainTags: [],
       photoTags: [],
       orientation: '',
       orientations: [
@@ -123,14 +124,20 @@ export default defineComponent({
       this.currentPhotoshoot = pts;
       window.ipcRenderer.invoke('file:read', { path: pts + "/photoshoot_config.json" }).then((content) => {
         this.photoshootInfos = JSON.parse(content);
+        delete this.photoshootInfos.requirements
+        delete this.photoshootInfos.requirement_description
+        this.photoshootInfos.cost = parseInt(this.photoshootInfos.cost, 10)
       });
     },
     selectPhoto(img) {
       this.photoInEdit = img;
       var imgName = img.split("/").slice(-1)[0].split('.')[0]
-      var tokens = imgName.split('_').slice(1, 90).join('_').split(',')
-      var subTags = tokens[0].split('-').slice(1, 90)
-      tokens[0] = tokens[0].split('-')[0]
+      var imgParts = imgName.split('_').slice(1, 90).join('_').split('-')
+      var mainTags = imgParts[0].split(',')
+      var subTags = []
+      if (imgParts.length > 1) {
+        subTags = imgParts[1].split(',')
+      }
 
       try {
         this.id = parseInt(imgName.split('_')[0], 10);
@@ -144,31 +151,42 @@ export default defineComponent({
       this.bottomless = subTags.filter(f => f == 'nobot').length > 0;
       this.faceless = subTags.filter(f => f == 'noface').length > 0;
       this.closeup = subTags.filter(f => f == 'closeup').length > 0;
-      this.cover = tokens.filter(f => f == 'cover').length > 0;
+      this.cover = subTags.filter(f => f == 'cover').length > 0;
 
-      this.photoTags = this.$refs.actionPicker.parse(tokens)
+      this.photoTags = this.$refs.actionPicker.parse(subTags)
 
       // this.orientation = tokens.filter(f => f == 'vert').length > 0 ? 'vert' : '';
-      this.photoType = ''
-      var matchingType = this.clothingLevelOptions.find(t => tokens.includes(t.value));
-      if (matchingType != undefined) {
-        this.photoType = matchingType;
-      }
+      console.log(subTags)
+      this.photoType = this.clothingLevelOptions.find(c => c.value == mainTags[0])
     },
     onChange() {
 
       if (this.photoInEdit != '') {
         var newName = this.photoInEdit.split("/").slice(0, -1).join("/") + "/";
         console.log(this.photoTags)
-        newName += this.id + "_"
-          + this.photoType?.value
-          + (this.topless ? ',notop' : '')
-          + (this.bottomless ? ',nobot' : '')
-          + (this.faceless ? ',noface' : '')
-          + (this.closeup ? ',closeup' : '')
-          + (this.cover ? ',cover' : '')
-          + (this.photoTags.length > 0 ? (',' + this.$tools.distinct(this.photoTags).join(',')) : '')
-          + (this.orientation === 'vert' ? ',vert' : '') + ".webp";
+        var tagList = []
+        if (this.topless) {
+          tagList.push('notop')
+        }
+        if (this.bottomless) {
+          tagList.push('nobot')
+        }
+        if (this.faceless) {
+          tagList.push('noface')
+        }
+        if (this.closeup) {
+          tagList.push('closeup')
+        }
+        if (this.cover) {
+          tagList.push('cover')
+        }
+        if (this.photoTags.length > 0) {
+          tagList = tagList.concat(this.$tools.distinct(this.photoTags))
+        }
+        if (this.orientation === 'vert') {
+          tagList.push('vert')
+        }
+        newName += this.id + "_" + this.photoType?.value + (tagList.length > 0 ? ('-' + tagList.join(',')) : '') + '.webp'
         this.currentPhotos[this.currentPhotos.indexOf(this.photoInEdit)] = newName;
         window.ipcRenderer.send('img:rename', { oldPath: this.photoInEdit, newPath: newName });
         this.photoInEdit = newName;

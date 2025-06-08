@@ -1,0 +1,25 @@
+{
+    "id": "kiara_cole",
+    "first_name": "Kiara",
+    "last_name": "Cole",
+    "area_sensitivity": {
+        "boobs": 1.25,
+        "pussy": 1,
+        "ass": 1,
+        "legs": 1
+    },
+    "traits": [
+        "blonde_hair",
+        "blue_eyes",
+        "small_boobs",
+        {
+            "name": "sensitive_nipples",
+            "color": "#CC8888",
+            "stat_growth_multipliers": {"naturism": 0.1},
+            "base_stat_modifiers": {"boobs_sensitivity": 0.25},
+            "description": "Her nipples are very sensitive, becoming erect at the lightest of touches."
+        }
+    ],
+    "generate_additional_traits": false,
+    "modder": "HeX"
+}
