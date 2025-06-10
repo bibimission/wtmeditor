@@ -25,7 +25,7 @@ function createWindow () {
    */
   mainWindow = new BrowserWindow({
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
-    width: 1000,
+    width: 1300,
     height: 600,
     useContentSize: true,
     webPreferences: {
@@ -71,7 +71,11 @@ ipcMain.on('girl:infos:write', (e, data) => {
 })
 
 ipcMain.handle('folder:load', async (e, data) => {
+  try{
   return await folderTool.readGirlFolder(data.name);
+  }catch(e){
+    console.log(e)
+  }
 })
 ipcMain.handle('folder:create', async (e, data) => {
   return folderTool.createGirlFolder(data.name);

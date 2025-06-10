@@ -20,23 +20,14 @@
     </div>
     <fieldset class="eventForm col" v-if="currentEvent != ''">
         <legend>Event Info</legend>
-        <q-input v-model="eventName" @change="onInfoChange" label="Name"></q-input>
-        <q-input v-model="eventLabel" @change="onInfoChange" label="Label"></q-input>
-        <!--<q-input v-model="eventOccurence" @change="onInfoChange" type="number" label="Occurence"></q-input>-->
-        <!--<q-input v-model="eventCooldown" @change="onInfoChange" type="number" label="Cooldown"></q-input>-->
-
-        <q-select @update:model-value="onInfoChange" v-model="eventDays" label="Days" multiple :options="daysOptions" use-input use-chips input-debounce="0"></q-select>
-        <q-input v-model="eventSource" @change="onInfoChange" label="Source"></q-input>
-        <q-input v-model="eventModder" @change="onInfoChange" label="Modder"></q-input>
-        <fieldset>
-            <legend>Requirement</legend>
-            <q-input v-model="eventStats.intellect" @change="onInfoChange" type="number" label="Intellect"></q-input>
-            <q-input v-model="eventStats.naturism" @change="onInfoChange" type="number" label="Naturism"></q-input>
-            <q-input v-model="eventStats.affection" @change="onInfoChange" type="number" label="Affection"></q-input>
-            <q-input v-model="eventStats.corruption" @change="onInfoChange" type="number" label="Corruption"></q-input>
-            <q-input v-model="eventStats.discipline" @change="onInfoChange" type="number" label="Discipline"></q-input>
-            <q-input v-model="eventStats.fear" @change="onInfoChange" type="number" label="Fear"></q-input>
-        </fieldset>
+        <q-input v-model="eventInformations.display_name" @change="onNameChange" label="Name"></q-input>
+        <q-select label="Place(s)" @update:model-value="onInfoChange" v-model="eventInformations.event_type" :multiple="true" :options="eventPlaceOptions"></q-select>
+        <label>Time</label>
+        <q-range label-always v-model="eventTime" :min="1" :max="23" @change="onTimeChange"></q-range>
+        <q-select :options="probaPresets" v-model="eventProba" @update:model-value="onProbaChange" label="Proba"></q-select>
+        <q-select :options="requirementsPresets" v-model="eventRequirement" @update:model-value="onRequirementsChange" label="Requirements" :multiple="true"></q-select>
+        <q-checkbox v-model="eventInformations.one_time_event" label="Happen Only Once"></q-checkbox>
+        <q-checkbox v-model="eventInformations.reset_outfit_when_finished" label="Reset clothes on end"></q-checkbox>
     </fieldset>
     <div class="imgGrid">
         <CustomMedia v-for="img, index in computeCurrentPhotos" :key="index" :src="img"></CustomMedia>
@@ -60,30 +51,139 @@ export default defineComponent({
         return {
             currentEvent: '',
 
-            daysOptions: [
-                { label: 'Monday', value: '1' },
-                { label: 'Tuesday', value: '2' },
-                { label: 'Wednesday', value: '3' },
-                { label: 'Thursday', value: '4' },
-                { label: 'Friday', value: '5' },
-                { label: 'Saturday', value: '6' },
-                { label: 'Sunday', value: '7' }
+            eventPlaceOptions: [
+                'home',
+                'office'
             ],
 
-            eventName: '',
-            eventLabel: '',
-            eventOccurence: 1,
-            eventCooldown: 1,
-            eventDays: [],
-            eventSource: '',
-            eventModder: '',
-            eventStats: {
-                intellect: 0,
-                naturism: 0,
-                affection: 0,
-                corruption: 0,
-                discipline: 0,
-                fear: 0
+            requirementsPresets: [
+                {
+                    label: 'Corruption',
+                    value: '',
+                    disable: true
+                },
+                {
+                    label: 'Prude',
+                    value: 'girl.corruption < 25'
+                },
+                {
+                    label: 'Slut',
+                    value: 'girl.corruption >= 25 and girl.corruption < 75'
+                },
+                {
+                    label: 'Whore',
+                    value: 'girl.corruption >= 75'
+                },
+                {
+                    label: 'Naturism',
+                    value: '',
+                    disable: true
+                },
+                {
+                    label: 'Shy',
+                    value: 'girl.naturism < 25'
+                },
+                {
+                    label: 'Revealing',
+                    value: 'girl.naturism >= 25 and girl.naturism < 75'
+                },
+                {
+                    label: 'Naturist',
+                    value: 'girl.naturism >= 75'
+                },
+                {
+                    label: 'Affection',
+                    value: '',
+                    disable: true
+                },
+                {
+                    label: 'Defiant',
+                    value: 'girl.affection < 25'
+                },
+                {
+                    label: 'Loving',
+                    value: 'girl.affection >= 25 and girl.affection < 75'
+                },
+                {
+                    label: 'Mad for you',
+                    value: 'girl.affection >= 75'
+                },
+                {
+                    label: 'Fear',
+                    value: '',
+                    disable: true
+                },
+                {
+                    label: 'Scared',
+                    value: 'girl.fear < 25'
+                },
+                {
+                    label: 'Normal',
+                    value: 'girl.fear >= 25 and girl.fear < 75'
+                },
+                {
+                    label: 'Confident',
+                    value: 'girl.fear >= 75'
+                }
+            ],
+            probaPresets: [
+                {
+                    label: 'Rarely',
+                    value: 20
+                },
+                {
+                    label: 'Sometimes',
+                    value: 50
+
+                },
+                {
+                    label: 'Often',
+                    value: 80
+                }
+            ],
+
+            eventTime: {
+                min: 1,
+                max: 23
+            },
+            eventProba: null,
+            eventRequirement: [],
+
+            eventInformations: {
+                name: '',
+                display_name: '',
+                event_type: [],
+                requirements: 'False',
+                requirement_description: 'None',
+                min_chance_to_happen: 15,
+                /* On se sert pas de cette partie, c'est trop chiant
+                max_chance_to_happen: 30,
+                chance_to_happen_calculation:{
+                    action_requirements:{
+                        corruption: 5,
+                        affection: 5
+                    },
+                    accept_influences:{
+                        corruption: {weight: 0.45},
+                        affection: {weight: 0.4},
+                        fear: {weight: -0.1}
+                    }
+                },
+                */
+                stages: [],
+                one_time_event: true,
+                impacts: {
+                    participants: {
+                        impacts: {
+                            corruption: [2000, 3500],
+                            naturism: [2000, 3500],
+                            affection: [2000, 3500],
+                            fear: [2000, 3500],
+                        }
+                    }
+                },
+                reset_outfit_when_finished: true,
+                hide_in_menus: false
             },
 
             eventElements: [],
@@ -92,12 +192,9 @@ export default defineComponent({
                 'Player Dialog',
                 'Girl Dialog',
                 'Image',
-                'Image End',
                 'Video',
                 'Video End',
                 'Background',
-                'Show Phone',
-                'Hide Phone',
             ]
         }
     },
@@ -105,75 +202,54 @@ export default defineComponent({
         selectEvent(e, event) {
             this.currentEvent = event;
             this.loadEventInfos();
-            this.loadEventElements();
+            setTimeout(() => {
+                this.loadEventElements()
+            }, 200)
         },
         loadEventInfos() {
-            window.ipcRenderer.invoke('file:read', { path: this.currentEvent + "/eventConfig.ini" }).then((content) => {
-                var lines = content.split("\n");
-                lines.forEach(l => {
-                    if (l.split("event_name =").length > 1) {
-                        this.eventName = l.split("event_name")[1].trim().substring(1).trim();
-                    }
-                    if (l.split("event_label =").length > 1) {
-                        this.eventLabel = l.split("event_label")[1].trim().substring(1).trim();
-                    }
-                    if (l.split("event_occurence =").length > 1) {
-                        this.eventOccurence = parseInt(l.split("event_occurence")[1].trim().substring(1).trim(), 10);
-                    }
-                    if (l.split("event_cooldown =").length > 1) {
-                        this.eventCooldown = parseInt(l.split("event_cooldown")[1].trim().substring(1).trim(), 10);
-                    }
-                    if (l.split("allowedDays =").length > 1) {
-                        this.eventDays = this.daysOptions.filter(d => l.split("allowedDays")[1].trim().substring(1).trim().split(',').includes(d.value));
-                    }
-                    if (l.split("source =").length > 1) {
-                        this.eventSource = l.split("source")[1].trim().substring(1).trim();
-                    }
-                    if (l.split("modder =").length > 1) {
-                        this.eventModder = l.split("modder")[1].trim().substring(1).trim();
-                    }
-                    if (l.split("stats_inacdf =").length > 1) {
-                        var toks = l.split("stats_inacdf")[1].trim().substring(1).trim().split(',');
-                        this.eventStats.intellect = parseInt(toks[0]);
-                        this.eventStats.naturism = parseInt(toks[1]);
-                        this.eventStats.affection = parseInt(toks[2]);
-                        this.eventStats.corruption = parseInt(toks[3]);
-                        this.eventStats.discipline = parseInt(toks[4]);
-                        this.eventStats.fear = parseInt(toks[5]);
-                    }
-                });
+            window.ipcRenderer.invoke('file:read', { path: this.currentEvent + "/event_config.json" }).then((content) => {
+                this.eventInformations = JSON.parse(content);
+                if (this.eventInformations.requirements.split('time_manager.hour > ').length > 1) {
+                    this.eventTime.min = parseInt(this.eventInformations.requirements.split('time_manager.hour > ')[1].split(' and')[0], 10)
+                }
+                if (this.eventInformations.requirements.split('time_manager.hour < ').length > 1) {
+                    this.eventTime.max = parseInt(this.eventInformations.requirements.split('time_manager.hour < ')[1].split(' and')[0], 10)
+                }
+                this.eventProba = this.probaPresets.find(p => p.value == this.eventInformations.min_chance_to_happen)
+                this.eventRequirement = this.requirementsPresets.filter(r => r.value != '' && this.eventInformations.requirements.split(r.value).length > 1)
             });
         },
         loadEventElements() {
+            console.log('loading ' + this.computeCurrentEventFile)
             window.ipcRenderer.invoke('file:read', { path: this.computeCurrentEventFile }).then((content) => {
                 this.eventElements = this.parseEventElements(content.split("\n"));
             })
         },
+        onNameChange() {
+            this.eventInformations.name = (this.eventInformations.display_name).toLowerCase().replace(/[^a-zA-Z0-9]/g, '_')
+            this.eventInformations.stages = [(this.folderPath + '_' + this.eventInformations.name).toLowerCase().replace(/[^a-zA-Z0-9]/g, '_')]
+            this.onInfoChange()
+        },
+        onProbaChange() {
+            setTimeout(() => {
+                this.eventInformations.min_chance_to_happen = this.eventProba.value
+                this.onInfoChange()
+            }, 200)
+        },
+        onRequirementsChange() {
+            setTimeout(() => {
+                this.onTimeChange()
+            }, 200)
+        },
+        onTimeChange() {
+            this.eventInformations.requirements = 'time_manager.hour > ' + this.eventTime.min + ' and time_manager.hour < ' + this.eventTime.max + (this.eventRequirement.length > 0 ? (' and ' + this.eventRequirement.map((r) => { return r.value }).join(' and ')) : '')
+            this.eventInformations.requirement_description = 'Between ' + this.eventTime.min + 'h and ' + this.eventTime.max + 'h' + (this.eventRequirement.length > 0 ? (' and girl status ' + this.eventRequirement.map((r) => { return r.label }).join(', ')) : '')
+            this.onInfoChange()
+        },
         onInfoChange() {
             setTimeout(() => {
-                var iniText = "[info]\n";
-                iniText += "event_name = " + this.eventName + "\n";
-                iniText += "event_label = " + this.eventLabel + "\n";
-                iniText += "occurence = " + this.eventOccurence + "\n";
-                iniText += "cooldown = " + this.eventCooldown + "\n";
-
-                iniText += "allowedDays = ";
-                iniText += this.eventDays.map(e => e.value).join(',');
-                iniText += "\n";
-
-                iniText += "source = " + this.eventSource + "\n";
-                iniText += "modder = " + this.eventModder + "\n";
-
-                iniText += "[requirements]\n";
-
-                iniText += "stats_inacdf = " + this.eventStats.intellect + ",";
-                iniText += this.eventStats.naturism + ",";
-                iniText += this.eventStats.affection + ",";
-                iniText += this.eventStats.corruption + ",";
-                iniText += this.eventStats.discipline + ",";
-                iniText += this.eventStats.fear;
-                iniText += "\n";
-                window.ipcRenderer.send('file:write', { path: this.currentEvent + "/eventConfig.ini", text: iniText })
+                console.log('To Write', this.eventInformations)
+                window.ipcRenderer.send('file:write', { path: this.currentEvent + "/event_config.json", text: JSON.stringify(this.eventInformations) })
             }, 200);
         },
         onImagePick(e, index) {
@@ -181,48 +257,42 @@ export default defineComponent({
             this.onElementChange();
         },
         onElementChange() {
-            var fourSpaces = "    ";
-            var rpyText = "label " + this.eventLabel + ":\n";
-            this.eventElements.forEach(function (e, i) {
-                switch (e.type) {
-                    case "label":
-                        //rpyText += e.value + "\n";
-                        break;
-                    case "Narration":
-                        rpyText += fourSpaces + "\"" + e.value + "\"\n";
-                        break;
-                    case "Player Dialog":
-                        rpyText += fourSpaces + "player \"" + e.value + "\"\n";
-                        break;
-                    case "Girl Dialog":
-                        rpyText += fourSpaces + "event_girl \"" + e.value + "\"\n";
-                        break;
-                    case "Image":
-                        rpyText += fourSpaces + "$selectedEvent.setImg(\"" + e.value + "\")\n";
-                        break;
-                    case "Image End":
-                        rpyText += fourSpaces + "$selectedEvent.setImg()\n";
-                        break;
-                    case "Video":
-                        rpyText += fourSpaces + "$selectedEvent.setVid(\"" + e.value + "\")\n";
-                        break;
-                    case "Video End":
-                        rpyText += fourSpaces + "$selectedEvent.setVid()\n";
-                        break;
-                    case "Show Phone":
-                        rpyText += fourSpaces + "show phone\n";
-                        break;
-                    case "Hide Phone":
-                        rpyText += fourSpaces + "hide phone\n";
-                        break;
-                    case "Background":
-                        rpyText += fourSpaces + "$selectedEvent.setBackground(\"" + e.value + "\")\n";
-                        break;
-                }
-            });
-            rpyText += fourSpaces + "jump eventend\n";
-
-            window.ipcRenderer.send('file:write', { path: this.computeCurrentEventFile, text: rpyText })
+            setTimeout(() => {
+                var fourSpaces = "    ";
+                var rpyText = "label " + this.eventInformations.name + ":\n";
+                rpyText += fourSpaces + '$selected_girl = current_event.participants[0]\n';
+                this.eventElements.forEach(function (e, i) {
+                    switch (e.type) {
+                        case "label":
+                            //rpyText += e.value + "\n";
+                            break;
+                        case "Narration":
+                            rpyText += fourSpaces + "\"" + e.value + "\"\n";
+                            break;
+                        case "Player Dialog":
+                            rpyText += fourSpaces + "player.character \"" + e.value + "\"\n";
+                            break;
+                        case "Girl Dialog":
+                            rpyText += fourSpaces + "selected_girl.character \"" + e.value + "\"\n";
+                            break;
+                        case "Image":
+                            rpyText += fourSpaces + "$current_event.show_image(\"" + e.value + "\")\n";
+                            break;
+                        case "Video":
+                            rpyText += fourSpaces + "$current_event.show_video(\"" + e.value + "\")\n";
+                            break;
+                        case "Video End":
+                            rpyText += fourSpaces + "$current_event.hide_video()\n";
+                            break;
+                        case "Background":
+                            rpyText += fourSpaces + "$selectedEvent.setBackground(\"" + e.value + "\")\n";
+                            break;
+                    }
+                });
+                rpyText += fourSpaces + "return\n";
+                console.log('Write to ' + this.computeCurrentEventFile)
+                window.ipcRenderer.send('file:write', { path: this.computeCurrentEventFile, text: rpyText })
+            }, 50)
         },
         parseEventElements(lines) {
             var els = [];
@@ -232,11 +302,11 @@ export default defineComponent({
                     return;
                 }
                 var el = {};
-                if (tokens[0] == "player") {
+                if (tokens[0] == "player.character") {
                     el.type = "Player Dialog";
                     var texte = tokens.slice(1, tokens.length).join(" ");
                     el.value = texte.substring(1, texte.length - 1);
-                } else if (tokens[0] == "event_girl") {
+                } else if (tokens[0] == "selected_girl.character") {
                     el.type = "Girl Dialog";
                     var texte = tokens.slice(1, tokens.length).join(" ");
                     el.value = texte.substring(1, texte.length - 1);
@@ -244,26 +314,20 @@ export default defineComponent({
                     el.type = "Narration";
                     var texte = tokens.slice(0, tokens.length).join(" ");
                     el.value = texte.substring(1, texte.length - 1);
-                } else if (tokens[0] == "$selectedEvent.setImg()") {
-                    el.type = "Image End";
-                } else if (tokens[0] == "$selectedEvent.setVid()") {
+                } else if (tokens[0] == "$current_event.hide_video()") {
                     el.type = "Video End";
-                } else if (tokens[0].includes("$selectedEvent.setBackground")) {
+                } else if (tokens[0].includes("$current_event.set_background")) {
                     el.type = "Background";
                     el.value = tokens[0].split('"')[1];
-                } else if (tokens[0].includes("$selectedEvent.setImg")) {
+                } else if (tokens[0].includes("$current_event.show_image")) {
                     el.type = "Image";
                     el.value = l.trim().split('"')[1];
-                } else if (tokens[0].includes("$selectedEvent.setVid")) {
+                } else if (tokens[0].includes("$current_event.show_video")) {
                     el.type = "Video";
                     el.value = l.trim().split('"')[1];
                 } else if (tokens[0] == "label") {
                     el.type = "label";
                     el.value = l;
-                } else if (tokens[0] == "show") {
-                    el.type = "Show Phone";
-                } else if (tokens[0] == "hide") {
-                    el.type = "Hide Phone";
                 } else {
                     return;
                 }
@@ -300,7 +364,7 @@ export default defineComponent({
         computeCurrentEventFile() {
             var theF = this.files.find(p => p.split(this.currentEvent).length > 1 && p != this.currentEvent && p.split(".")[1] == "rpy");
             if (theF == null) {
-                theF = './packs/' + this.folderPath + '/events/' + this.eventName + '/' + this.eventName + '.rpy';
+                theF = './packsCA/' + this.folderPath + '/events/' + this.currentEvent.split('/').slice(-1)[0] + '/' + this.eventInformations.name + '.rpy';
             }
             return theF;
         },
@@ -318,6 +382,7 @@ export default defineComponent({
 
 .eventForm {
     width: 20%;
+    color: black;
 }
 
 .eventElements {
