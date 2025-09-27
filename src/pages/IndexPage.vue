@@ -14,6 +14,7 @@
           <q-tab name="events" icon="event" label="Events" />
           <q-tab name="clothing" icon="school" label="Clothes" />
           <q-tab name="photoshoots" icon="photo" label="Photoshoots" />
+          <q-tab name="videoshoots" icon="movie" label="Videoshoots" />
           <q-tab name="vids" icon="movie" label="Videos" />
         </q-tabs>
       </div>
@@ -44,6 +45,10 @@
           <PhotoshootSection :files="photoshootFiles" @change="loadFolder"></PhotoshootSection>
         </q-tab-panel>
 
+        <q-tab-panel name="videoshoots">
+          <VideoShootSection :files="videoshootFiles" @change="loadFolder"></VideoShootSection>
+        </q-tab-panel>
+
         <q-tab-panel name="vids">
           <VideosSection :videos="computeVideos" @change="loadFolder"></VideosSection>
         </q-tab-panel>
@@ -61,6 +66,7 @@ import PhotoshootSection from 'src/components/PhotoshootSection.vue'
 import EventSection from 'src/components/EventSection.vue'
 import FullBodySection from 'src/components/FullBodySection.vue'
 import ClothingSection from 'src/components/ClothingSection.vue'
+import VideoShootSection from 'src/components/VideoShootSection.vue'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -71,7 +77,8 @@ export default defineComponent({
     PhotoshootSection,
     EventSection,
     FullBodySection,
-    ClothingSection
+    ClothingSection,
+    VideoShootSection
   },
   setup() {
     return {
@@ -92,6 +99,7 @@ export default defineComponent({
       bodyPhotos: [],
       videos: [],
       photoshootFiles: [],
+      videoshootFiles: [],
       eventFiles: [],
       fullbodyFiles: [],
       clothesFiles: [],
@@ -111,6 +119,7 @@ export default defineComponent({
         this.bodyPhotos = data.files.filter(f => f.split('/body_images/').length > 1 || f.split(this.folderPath + '/face').length > 1 || f.split(this.folderPath + '/portrait').length > 1 || f.split(this.folderPath + '/tportrait').length > 1);
         this.videos = data.files.filter(f => f.split('/vids/').length > 1);
         this.photoshootFiles = data.files.filter(f => f.split('/photoshoots/').length > 1);
+        this.videoshootFiles = data.files.filter(f => f.split('/videoshoots/').length > 1);
         this.eventFiles = data.files.filter(f => f.split('/events/').length > 1);
         this.clothesFiles = data.files.filter(f => f.split('/clothing/').length > 1);
         this.fullbodyFiles = data.files.filter(f => f.split('/fullbody/').length > 1);

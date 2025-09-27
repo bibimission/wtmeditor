@@ -103,7 +103,10 @@ class FolderTool {
     });
   }
 
-  writeFile(filePath, text) {
+  writeFile(filePath, text, base64 = false) {
+    if (base64) {
+      text = new Buffer(text, "base64");
+    }
     fs.writeFileSync(filePath, text, function (err) {
       if (err) {
         return console.log(err);
