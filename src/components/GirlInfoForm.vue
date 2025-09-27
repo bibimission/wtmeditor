@@ -100,7 +100,7 @@ export default defineComponent({
           value: '',
           disable: true,
         },
-        'squirter', 'horny', 'naturist', 'onanist', 'nympho',
+        'squirter', 'horny', 'naturist', 'onanist', 'nympho', 'oral_fixation',
         {
           label: 'Traits',
           value: '',

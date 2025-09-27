@@ -31,7 +31,14 @@ export default defineComponent({
     return {
       tmpFiles: [],
       currentFileAdd: null,
-      clothesOptions: ['bare', 'bottomless', 'underwear', 'topless', 'clothed', 'shower', 'maid', 'nurse', 'work', 'uniform', 'athletic', 'swimsuit', 'bikini'],
+      clothesOptions: [
+        'bare', 'bottomless', 'underwear',
+        'topless', 'clothed', 'shower',
+        'maid', 'nurse', 'work', 'secretary',
+        'teacher', 'teaching_assistant',
+        'uniform', 'athletic', 'swimsuit',
+        'bikini'
+      ],
       selectedPicIndex: -1,
       selectedOutfit: null,
       selectedClotheLevel: null,
