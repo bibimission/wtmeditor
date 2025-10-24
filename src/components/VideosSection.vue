@@ -82,6 +82,7 @@ export default defineComponent({
       partyOptions: [
         { label: 'Alone', value: '', img: 'none.png' },
         { label: 'Woman', value: 'tp_fem', img: 'woman.png' },
+        { label: 'Mother', value: 'tp_fem,mother', img: 'woman.png' },
         { label: 'Man', value: 'tp_male', img: 'man.png' },
       ],
       activeParties: [''],

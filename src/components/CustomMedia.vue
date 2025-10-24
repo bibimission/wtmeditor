@@ -38,7 +38,7 @@ export default defineComponent({
       if (!this.isConverting && this.computeNeedConversion) {
         this.isConverting = true;
         var type = this.computeMediaType;
-        if (this.realSrc.split(".")[1] == 'gif' || this.forceVideo) {
+        if (this.realSrc.split(".").slice(-1)[0] == 'gif' || this.forceVideo) {
           type = "video";
         }
         if (type == "img") {
@@ -49,7 +49,7 @@ export default defineComponent({
             this.isConverting = false;
           });
         } else if (type == "video") {
-          if (this.realSrc.split(".")[1] == 'webp') {
+          if (this.realSrc.split(".").slice(-1)[0] == 'webp') {
             window.ipcRenderer.invoke('img:getFrames', { img: this.realSrc }).then((success) => {
               this.realSrc = this.realSrc.split(".")[0] + ".webm";
               this.isConverting = false;
@@ -85,10 +85,10 @@ export default defineComponent({
       }
     },
     isVideoFormat(fp) {
-      return this.videoFormats.includes(fp.split(".")[1]);
+      return this.videoFormats.includes(fp.split(".").slice(-1)[0]);
     },
     isImgFormat(fp) {
-      return this.imgFormats.includes(fp.split(".")[1]);
+      return this.imgFormats.includes(fp.split(".").slice(-1)[0]);
     },
     onHover(e) {
       if (e.target.paused) {
@@ -106,9 +106,9 @@ export default defineComponent({
     computeNeedConversion() {
       var type = this.computeMediaType;
       if (type == 'img') {
-        return this.realSrc.split(".")[1] != "webp" || this.forceVideo
+        return this.realSrc.split(".").slice(-1)[0] != "webp" || this.forceVideo
       } else if (type == "video") {
-        return this.realSrc.split(".")[1] != "webm"
+        return this.realSrc.split(".").slice(-1)[0] != "webm"
       } else {
         return false;
       }
