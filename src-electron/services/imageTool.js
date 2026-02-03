@@ -10,42 +10,42 @@ const util = require('util')
 import { removeBackground } from "@imgly/background-removal-node";
 
 const terminateWithError = (error = '[fatal] error') => {
-	console.log(error)
-	//process.exit(1)
+    console.log(error)
+    //process.exit(1)
 }
 
 const exec = util.promisify(child.exec)
 
-const webp=require('webp-converter');
+const webp = require('webp-converter');
 webp.grant_permission();
 
 const fs = require('fs')
 
-class ImageTool{
-    constructor(){
+class ImageTool {
+    constructor() {
 
     }
 
-    static async convertImageToWebp(imagePath){
+    static async convertImageToWebp(imagePath) {
         return new Promise(async (resolve) => {
-            try{
-                var resUrl = imagePath.split(".")[0]+".webp";
-                const result = webp.cwebp(imagePath,resUrl,"-q 80","-v");
+            try {
+                var resUrl = imagePath.split(".")[0] + ".webp";
+                const result = webp.cwebp(imagePath, resUrl, "-q 80", "-v");
                 result.then((response) => {
                     fs.unlinkSync(imagePath);
                     resolve(resUrl);
                     console.log(response);
                 });
-            }catch(e){
+            } catch (e) {
                 console.log(e.message);
                 resolve(false);
             }
         });
     }
 
-    static async convertWebpToWebm(imagePath){
+    static async convertWebpToWebm(imagePath) {
         return this.convertWebpToWebmNew(imagePath);
-        return new Promise(async (resolve) =>{
+        return new Promise(async (resolve) => {
             const webPImage = await new WebpImage();
             await webPImage.load(imagePath);
             if (webPImage.hasAnim) {
@@ -58,52 +58,50 @@ class ImageTool{
         })
     }
 
-    static async resizeWebm(imagePath){
+    static async resizeWebm(imagePath) {
         return new Promise(async (resolve) => {
             var ffmpeg = require("fluent-ffmpeg")()
-            .setFfprobePath(ffprobe.path)
-            .setFfmpegPath(ffmpegInstaller.path);
-        
+                .setFfprobePath(ffprobe.path)
+                .setFfmpegPath(ffmpegInstaller.path);
+
             ffmpeg
-            .input(imagePath)
-            .noAudio()
-            .outputOptions('-pix_fmt yuv420p')
-            .output(imagePath.split('.')[0] + "1.webm")
-            .size('720x?')
-            .on("end", (e) => {
-                console.log("Generated !");
-                fs.unlinkSync(imagePath);
-                ffmpeg.kill();
-                resolve(imagePath.split('.')[0] + "1.webm");
-            })
-            .on("error", (e) => console.log(e)).run();
+                .input(imagePath)
+                .outputOptions('-pix_fmt yuv420p')
+                .output(imagePath.split('.')[0] + "1.webm")
+                .size('720x?')
+                .on("end", (e) => {
+                    console.log("Generated !");
+                    fs.unlinkSync(imagePath);
+                    ffmpeg.kill();
+                    resolve(imagePath.split('.')[0] + "1.webm");
+                })
+                .on("error", (e) => console.log(e)).run();
         });
     }
 
-    static async convertGifToWebm(imagePath){
+    static async convertGifToWebm(imagePath) {
         return new Promise(async (resolve) => {
             var ffmpeg = require("fluent-ffmpeg")()
-            .setFfprobePath(ffprobe.path)
-            .setFfmpegPath(ffmpegInstaller.path);
-        
+                .setFfprobePath(ffprobe.path)
+                .setFfmpegPath(ffmpegInstaller.path);
+
             ffmpeg
-            .input(imagePath)
-            .noAudio()
-            .outputOptions('-pix_fmt yuv420p')
-            .output(imagePath.substring(0,imagePath.length - 3) + "webm")
-            .size('720x?')
-            .on("end", (e) => {
-                console.log("Generated !");
-                fs.unlinkSync(imagePath);
-                ffmpeg.kill();
-                resolve(imagePath.substring(0,imagePath.length - 3) + "webm");
-            })
-            .on("error", (e) => console.log(e)).run();
+                .input(imagePath)
+                .outputOptions('-pix_fmt yuv420p')
+                .output(imagePath.substring(0, imagePath.length - 3) + "webm")
+                .size('720x?')
+                .on("end", (e) => {
+                    console.log("Generated !");
+                    fs.unlinkSync(imagePath);
+                    ffmpeg.kill();
+                    resolve(imagePath.substring(0, imagePath.length - 3) + "webm");
+                })
+                .on("error", (e) => console.log(e)).run();
         });
     }
 
-    static async convertWebpToWebmNew(filename){
-        return new Promise((resolve)=>{
+    static async convertWebpToWebmNew(filename) {
+        return new Promise((resolve) => {
             const nameWithoutExt = filename.replace('.webp', '')
             const frames = path.resolve(process.cwd(), 'frames')
             const deleteOriginal = true;
@@ -164,13 +162,13 @@ class ImageTool{
             console.log('Removing BG')
             const imageBuffer = fs.readFileSync(imgSource);
             const blob = new Blob([imageBuffer], { type: "image/png" });
-            var newName = imgSource.split('.')[0]+'.png';
+            var newName = imgSource.split('.')[0] + '.png';
             return new Promise((resolve) => {
-                removeBackground(blob).then(async(blob2) => {
+                removeBackground(blob).then(async (blob2) => {
                     console.log('BG removed')
                     const buffer = Buffer.from(await blob2.arrayBuffer());
                     fs.writeFileSync(newName, buffer);
-                    console.log('Saved to '+newName)
+                    console.log('Saved to ' + newName)
                     fs.unlinkSync(imgSource)
                     resolve(newName);
                 })

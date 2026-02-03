@@ -21,6 +21,7 @@
     <fieldset class="eventForm col" v-if="currentEvent != ''">
         <legend>Event Info</legend>
         <q-input v-model="eventInformations.display_name" @change="onNameChange" label="Name"></q-input>
+        <q-input v-model="eventInformations.event_cooldown" @change="onInfoChange" label="Cooldown"></q-input>
         <q-select label="Place(s)" @update:model-value="onInfoChange" v-model="eventInformations.event_type" :multiple="true" :options="eventPlaceOptions"></q-select>
         <label>Time</label>
         <q-range label-always v-model="eventTime" :min="1" :max="23" @change="onTimeChange"></q-range>
@@ -52,8 +53,13 @@ export default defineComponent({
             currentEvent: '',
 
             eventPlaceOptions: [
-                'home',
-                'office'
+                "home",
+                "dream",
+                "pre_exam", "during_exam", "post_exam",
+                "post_shoot",
+                "home_visit", "home_visit_early", "home_visit_call",
+                "office", "teachers_lounge", "bathroom", "clinic", "cafeteria", "locker_room",
+                "beach", "pier", "mall", "coffee_shop", "park"
             ],
 
             requirementsPresets: [
@@ -114,7 +120,7 @@ export default defineComponent({
                     disable: true
                 },
                 {
-                    label: 'Scared',
+                    label: 'Confident',
                     value: 'girl.fear < 25'
                 },
                 {
@@ -122,7 +128,7 @@ export default defineComponent({
                     value: 'girl.fear >= 25 and girl.fear < 75'
                 },
                 {
-                    label: 'Confident',
+                    label: 'Scared',
                     value: 'girl.fear >= 75'
                 }
             ],
@@ -155,35 +161,23 @@ export default defineComponent({
                 event_type: [],
                 requirements: 'False',
                 requirement_description: 'None',
-                min_chance_to_happen: 15,
-                /* On se sert pas de cette partie, c'est trop chiant
-                max_chance_to_happen: 30,
-                chance_to_happen_calculation:{
-                    action_requirements:{
-                        corruption: 5,
-                        affection: 5
-                    },
-                    accept_influences:{
-                        corruption: {weight: 0.45},
-                        affection: {weight: 0.4},
-                        fear: {weight: -0.1}
-                    }
-                },
-                */
+                min_chance_to_happen: 20,
+                event_cooldown: 2,
                 stages: [],
                 one_time_event: true,
                 impacts: {
                     participants: {
                         impacts: {
-                            corruption: [2000, 3500],
-                            naturism: [2000, 3500],
-                            affection: [2000, 3500],
-                            fear: [2000, 3500],
+                            corruption: [0, 50],
+                            naturism: [0, 50],
+                            affection: [0, 50],
+                            fear: [0, 50],
                         }
                     }
                 },
                 reset_outfit_when_finished: true,
-                hide_in_menus: false
+                hide_in_menus: false,
+                ignore_frequency: true
             },
 
             eventElements: [],
