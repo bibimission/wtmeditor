@@ -38,6 +38,7 @@
 import { defineComponent } from 'vue'
 import ImageSelect from './ImageSelect.vue';
 import CustomMedia from './CustomMedia.vue';
+import EventParser from 'src/utils/eventParser';
 
 export default defineComponent({
     components: {
@@ -51,6 +52,7 @@ export default defineComponent({
     data: function () {
         return {
             currentEvent: '',
+            EventParser,
 
             eventPlaceOptions: [
                 "home",
@@ -216,6 +218,10 @@ export default defineComponent({
         loadEventElements() {
             console.log('loading ' + this.computeCurrentEventFile)
             window.ipcRenderer.invoke('file:read', { path: this.computeCurrentEventFile }).then((content) => {
+                /* Test du parser externe
+                var eventObject = EventParser.parsePythonToObject(content)
+                console.log(EventParser.eventObjectToPython(eventObject))
+                */
                 this.eventElements = this.parseEventElements(content.split("\n"));
             })
         },

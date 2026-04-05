@@ -42,7 +42,7 @@
         </q-tab-panel>
 
         <q-tab-panel name="photoshoots">
-          <PhotoshootSection :files="photoshootFiles" @change="loadFolder"></PhotoshootSection>
+          <PhotoshootSection :files="photoshootFiles" @change="loadFolder" :girl_id="folderPath"></PhotoshootSection>
         </q-tab-panel>
 
         <q-tab-panel name="videoshoots">

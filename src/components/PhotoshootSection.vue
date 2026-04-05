@@ -1,5 +1,6 @@
 <template>
   <div>
+    <ApiGirlSelector v-model="photoshootInfos.participant_ids" :permanent-girl="girl_id"></ApiGirlSelector>
     <q-btn color="blue" v-for="pts, index in coputePhotoShootsNames" :key="index" @click="selectPhotoshoot($event, pts)">
       {{ pts.split('/').slice(-1)[0] }}
     </q-btn>
@@ -41,13 +42,15 @@
   </div>
 </template>
 <script>
+import ApiGirlSelector from './selectors/ApiGirlSelector.vue';
 import { defineComponent } from 'vue'
 import PhotoshootActionPicker from './selectors/PhotoshootActionPicker.vue';
 
 export default defineComponent({
-  components: { PhotoshootActionPicker },
+  components: { PhotoshootActionPicker, ApiGirlSelector },
   props: {
-    files: Array
+    files: Array,
+    girl_id: String
   },
   emits: ['change'],
   data: function () {
