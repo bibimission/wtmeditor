@@ -36,7 +36,7 @@ export default defineComponent({
       tmpFiles: [],
       currentFileAdd: null,
       bodypartOptions: ['portrait', 'tportrait', 'face', 'boobs', 'pussy', 'ass', 'legs'],
-      moodOptions: ['conservative', 'reserved', 'slut', 'whore', 'ultimate_whore'],
+      moodOptions: ['conservative', 'reserved', 'slut', 'whore', 'ultimate_whore', 'aroused', 'edging'],
       selectedPicIndex: -1,
       selectedBodyPart: null,
       selectedMood: null,
@@ -72,10 +72,10 @@ export default defineComponent({
         console.log(this.selectedHasCum)
         var newFileName = this.tmpFiles[this.selectedPicIndex].split('/').slice(0, -1).join('/')
           + '/' + this.selectedBodyPart
-          + (this.selectedMood == undefined ? '' : '_' + this.selectedMood)
-          + (this.selectedHasCum ? '_cum' : '')
-          + (this.selectedIsCreampie ? '_creampie' : '')
-          + (this.selectedHasButtPlug ? '_bp' : '')
+          + (this.selectedMood == undefined ? '' : '-' + this.selectedMood)
+          + (this.selectedHasCum ? ',cum' : '')
+          + (this.selectedIsCreampie ? ',creampie' : '')
+          + (this.selectedHasButtPlug ? ',bp' : '')
           + "_" + (Math.floor(Math.random() * 2000))
           + "." + this.tmpFiles[this.selectedPicIndex].split(".").slice(-1);
         window.ipcRenderer.send('img:rename', { oldPath: this.tmpFiles[this.selectedPicIndex], newPath: newFileName });

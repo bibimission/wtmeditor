@@ -11,16 +11,19 @@
     </div>
     <div class="sidePanel">
       <q-select :options="clothesOptions" label="Outfit" v-model="selectedOutfit" @update:model-value="onChange"></q-select>
+      <PlaceSelector v-model="selectedPlace"></PlaceSelector>
     </div>
   </div>
 </template>
 <script>
 import { defineComponent } from 'vue'
 import CustomMedia from './CustomMedia.vue';
+import PlaceSelector from './selectors/PlaceSelector.vue';
 
 export default defineComponent({
   components: {
-    CustomMedia
+    CustomMedia,
+    PlaceSelector
   },
   emits: ['change'],
   props: {
@@ -42,6 +45,7 @@ export default defineComponent({
       selectedPicIndex: -1,
       selectedOutfit: null,
       selectedClotheLevel: null,
+      selectedPlace:null
     }
   },
   computed: {
