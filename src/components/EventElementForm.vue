@@ -17,7 +17,7 @@
                 <q-select v-model="element.type" label="Element Type" :options="elementTypes" :disable="element.type == 'Option'" filled></q-select>
             </div>
             <div class="col elInput" v-if="element.type != 'Label'">
-                <template v-if="element.type === 'Narration'">
+                <template v-if="element.type === 'Narration' || element.type === 'Raw Code'">
                     <q-input type="textarea" rows="2" v-model="element.text" label="Value" @change="onElementChange" style="width:60%"></q-input>
                 </template>
                 <template v-if="element.type === 'Option'">
@@ -34,7 +34,7 @@
                 <template v-else-if="element.type === 'Show Phone'">
                     <q-checkbox label="With vibration" v-model="element.value" @change="onElementChange"></q-checkbox>
                 </template>
-                <ImageSelect class="imageSelect" :type="element.type" :photos="computeCurrentPhotos" :prefix="eventName" v-if="element.type == 'Image' || element.type == 'Video' || element.type == 'Background'" v-model="element.value"></ImageSelect>
+                <ImageSelect class="imageSelect" :type="element.type" :photos="photos" :prefix="eventName" v-if="element.type == 'Image' || element.type == 'Video' || element.type == 'Background'" v-model="element.value"></ImageSelect>
             </div>
             <div class="col elToolBar">
                 <q-btn @click="removeElement(el)" icon="delete"></q-btn>

@@ -39,7 +39,10 @@ export default class EventParser {
     ]
 
     static parsePythonToObject(eventTxt) {
-
+        let lineBreak = '\r\n'
+        if(eventTxt.split(lineBreak).length === 1){
+            lineBreak = '\n'
+        }
         const event = {
             parts: [],
             label: '',
@@ -51,12 +54,12 @@ export default class EventParser {
             chance: 0,
             days: []
         }
-        event.label = eventTxt.split(':\n')[0].split('label ')[1]
-        var labelParts = eventTxt.split('label')
+        event.label = eventTxt.split(':'+lineBreak)[0].split('label ')[1]
+        var labelParts = eventTxt.split('label ')
         labelParts.forEach((lp, index) => {
             if (lp.length == 0) return
 
-            var lines = lp.split('\n')
+            var lines = lp.split(lineBreak)
             var els = [];
 
             var currentEl = null;

@@ -17,6 +17,18 @@
             </div>
         </div>
         <q-btn @click="addElement">Add</q-btn>
+
+        <hr>
+        <div>New parser</div>
+        <div v-if="eventObject">
+            <div v-for="(p,i) in eventObject.parts" :key="i">
+                <div>{{ p.name }}</div>
+                <div v-for="(e,j) in p.els" :key="j">
+                    <EventElementForm :photos="computeCurrentPhotos" :eventName="currentEvent" :element="e"></EventElementForm>
+                </div>
+            </div>
+        </div>
+        
     </div>
     <fieldset class="eventForm col" v-if="currentEvent != ''">
         <legend>Event Info</legend>
@@ -39,11 +51,13 @@ import { defineComponent } from 'vue'
 import ImageSelect from './ImageSelect.vue';
 import CustomMedia from './CustomMedia.vue';
 import EventParser from 'src/utils/eventParser';
+import EventElementForm from './EventElementForm.vue';
 
 export default defineComponent({
     components: {
         ImageSelect,
-        CustomMedia
+        CustomMedia,
+        EventElementForm
     },
     props: {
         files: Array,
@@ -191,7 +205,9 @@ export default defineComponent({
                 'Video',
                 'Video End',
                 'Background',
-            ]
+            ],
+
+            eventObject: null
         }
     },
     methods: {
@@ -218,10 +234,11 @@ export default defineComponent({
         loadEventElements() {
             console.log('loading ' + this.computeCurrentEventFile)
             window.ipcRenderer.invoke('file:read', { path: this.computeCurrentEventFile }).then((content) => {
-                /* Test du parser externe
-                var eventObject = EventParser.parsePythonToObject(content)
-                console.log(EventParser.eventObjectToPython(eventObject))
-                */
+                //Test du parser externe
+                this.eventObject = EventParser.parsePythonToObject(content)
+                console.log('Event Object',this.eventObject)
+                // console.log(EventParser.eventObjectToPython(eventObject))
+                
                 this.eventElements = this.parseEventElements(content.split("\n"));
             })
         },
