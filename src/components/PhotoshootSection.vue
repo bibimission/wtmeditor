@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ApiGirlSelector v-model="photoshootInfos.participant_ids" :permanent-girl="girl_id"></ApiGirlSelector>
+    <ApiGirlSelector v-model="photoshootInfos.participant_ids" :permanent-girl="girl_id" hidden></ApiGirlSelector>
     <q-btn color="blue" v-for="pts, index in coputePhotoShootsNames" :key="index" @click="selectPhotoshoot($event, pts)">
       {{ pts.split('/').slice(-1)[0] }}
     </q-btn>
