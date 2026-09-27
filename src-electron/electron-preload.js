@@ -37,6 +37,7 @@ const ipc = {
             'girl:infos:write',
             'img:rename',
             'file:write',
+            'file:delete',
             'img:upload'
         ],
         // From main to render.

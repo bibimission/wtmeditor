@@ -14,7 +14,7 @@ try {
       path.join(app.getPath("userData"), "DevTools Extensions")
     );
   }
-} catch (_) {}
+} catch (_) { }
 
 const folderTool = new FolderTool();
 const apiTool = new ApiTool();
@@ -102,6 +102,9 @@ ipcMain.handle("api:getAll", async (e, data) => {
 });
 ipcMain.handle("file:read", async (e, data) => {
   return await folderTool.readFile(data.path);
+});
+ipcMain.on("file:delete", async (e, data) => {
+  return await folderTool.deleteFile(data.path);
 });
 ipcMain.on("img:rename", (e, data) => {
   folderTool.renameFile(data.oldPath, data.newPath);

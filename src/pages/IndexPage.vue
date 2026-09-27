@@ -8,49 +8,27 @@
       </div>
       <div class="tabHead">
         <q-tabs v-model="tab">
-          <q-tab name="infos" icon="info" label="Infos" />
-          <q-tab name="bodyparts" icon="person" label="Bodyparts" />
-          <q-tab name="fullbody" icon="woman" label="Fullbody" />
-          <q-tab name="events" icon="event" label="Events" />
-          <q-tab name="clothing" icon="school" label="Clothes" />
-          <q-tab name="photoshoots" icon="photo" label="Photoshoots" />
-          <q-tab name="videoshoots" icon="movie" label="Videoshoots" />
-          <q-tab name="vids" icon="movie" label="Videos" />
+          <q-tab name="mod_meta_data" icon="info" label="Mod Infos" />
+          <q-tab name="girl" icon="woman" label="Girl info" />
+          <q-tab name="cards" icon="label" label="Cards" />
+          <q-tab name="passives" icon="event" label="Passives" />
+          <q-tab name="videos" icon="movie" label="Videos" />
         </q-tabs>
       </div>
     </div>
     <div class="tabContent">
       <q-tab-panels v-model="tab" animated class="bg-white text-white">
-        <q-tab-panel name="infos">
-          <GirlInfoForm v-model="girlInfos" @change="saveGirl" ref="girlInfoForm"></GirlInfoForm>
+
+        <q-tab-panel name="mod_meta_data">
+          <ModInfoSection :files="files" ref="modInfoForm"></ModInfoSection>
         </q-tab-panel>
 
-        <q-tab-panel name="bodyparts">
-          <BodyPartsSection :photos="bodyPhotos" :folderPath="folderPath" @change="loadFolder"></BodyPartsSection>
+        <q-tab-panel name="girl">
+          <GirlInfoForm v-model="girlInfos" ref="girlInfoForm"></GirlInfoForm>
         </q-tab-panel>
 
-        <q-tab-panel name="fullbody">
-          <FullBodySection :photos="fullbodyFiles" @change="loadFolder"></FullBodySection>
-        </q-tab-panel>
-
-        <q-tab-panel name="events">
-          <EventSection :files="eventFiles" :folderPath="folderPath"></EventSection>
-        </q-tab-panel>
-
-        <q-tab-panel name="clothing">
-          <ClothingSection :files="clothesFiles" :folderPath="folderPath"></ClothingSection>
-        </q-tab-panel>
-
-        <q-tab-panel name="photoshoots">
-          <PhotoshootSection :files="photoshootFiles" @change="loadFolder" :girl_id="folderPath"></PhotoshootSection>
-        </q-tab-panel>
-
-        <q-tab-panel name="videoshoots">
-          <VideoShootSection :files="videoshootFiles" @change="loadFolder"></VideoShootSection>
-        </q-tab-panel>
-
-        <q-tab-panel name="vids">
-          <VideosSection :videos="computeVideos" @change="loadFolder"></VideosSection>
+        <q-tab-panel name="videos">
+          <VideosSection ref="videoSection" :files="files"></VideosSection>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -60,78 +38,45 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import GirlInfoForm from 'components/GirlInfoForm.vue'
-import BodyPartsSection from 'src/components/BodyPartsSection.vue'
-import VideosSection from 'src/components/VideosSection.vue'
-import PhotoshootSection from 'src/components/PhotoshootSection.vue'
-import EventSection from 'src/components/EventSection.vue'
-import FullBodySection from 'src/components/FullBodySection.vue'
-import ClothingSection from 'src/components/ClothingSection.vue'
-import VideoShootSection from 'src/components/VideoShootSection.vue'
+import ModInfoSection from 'components/ModInfoSection.vue'
+import VideosSection from 'src/components/VideosSection.vue';
 
 export default defineComponent({
   name: 'IndexPage',
   components: {
     GirlInfoForm,
-    BodyPartsSection,
-    VideosSection,
-    PhotoshootSection,
-    EventSection,
-    FullBodySection,
-    ClothingSection,
-    VideoShootSection
+    ModInfoSection,
+    VideosSection
   },
   setup() {
     return {
-      tab: ref('infos')
+      tab: ref('mod_meta_data')
     }
   },
   data: function () {
     return {
       folderPath: "",
-      girlInfos: {
-        first_name: "",
-        last_name: "",
-        traits: [],
-        source: "",
-        modder: "",
-        sensitive_area: ""
-      },
-      bodyPhotos: [],
-      videos: [],
-      photoshootFiles: [],
-      videoshootFiles: [],
-      eventFiles: [],
-      fullbodyFiles: [],
-      clothesFiles: [],
-
-      apiGirls: []
+      files: []
     }
   },
   methods: {
     loadFolder() {
       window.ipcRenderer.invoke('folder:load', { name: this.folderPath }).then((files) => {
         var data = JSON.parse(files);
-        this.girlInfos = data.infos;
-        if (this.$refs.girlInfoForm) {
-          this.$refs.girlInfoForm.load(data.infos);
-        }
-
-        this.bodyPhotos = data.files.filter(f => f.split('/body_images/').length > 1 || f.split(this.folderPath + '/face').length > 1 || f.split(this.folderPath + '/portrait').length > 1 || f.split(this.folderPath + '/tportrait').length > 1);
-        this.videos = data.files.filter(f => f.split('/vids/').length > 1);
-        this.photoshootFiles = data.files.filter(f => f.split('/photoshoots/').length > 1);
-        this.videoshootFiles = data.files.filter(f => f.split('/videoshoots/').length > 1);
-        this.eventFiles = data.files.filter(f => f.split('/events/').length > 1);
-        this.clothesFiles = data.files.filter(f => f.split('/clothing/').length > 1);
-        this.fullbodyFiles = data.files.filter(f => f.split('/fullbody/').length > 1);
+        this.files = data.files;
+        console.log('Files', this.files)
+        /*
+        var charDefs = data.files.filter(f => f.type == 'json' && f.file.split('/characters/').length > 1)
+        console.log(charDefs)
+        this.videos = data.files.filter(f => f.type == 'video');
+        this.images = data.files.filter(f => f.type == 'image');
+        */
       });
     },
     createFolder() {
       window.ipcRenderer.invoke('folder:create', { name: this.folderPath }).then((files) => {
         console.log(files)
       });
-    },
-    saveGirl() {
-      window.ipcRenderer.send('girl:infos:write', { name: this.folderPath, girl: JSON.stringify(this.girlInfos) });
     }
   },
   computed: {

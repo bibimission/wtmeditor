@@ -1,14 +1,9 @@
 <template>
   <div>
     <div class="pageBody">
-      <div class="col editPanel">
-        <q-bar class="bg-primary">Place</q-bar>
-        <q-select :options="placeOptions" clearable v-model="videoPlace" @update:model-value="onChange"></q-select>
-        <ClothingPicker v-model="videoClothing" ref="clothesPicker" @stripAction="onStrip" @update:model-value="onChange"></ClothingPicker>
-        <MoodPicker ref="moodPicker" v-model="videoMood" @update:model-value="onChange"></MoodPicker>
-      </div>
+      <q-btn @click="resetIds" color="red">Reset Ids</q-btn>
       <div v-if="computeVideos.length > 0" class="col mediaPlayer">
-        <CustomMedia :src="computeVideos[videoInEdit]" :forceVideo="true"></CustomMedia>
+        <CustomMedia :src="computeVideos[videoInEdit].url" :forceVideo="true"></CustomMedia>
         <div class="title">{{ videoMainAction }}</div>
         <div class="title">{{ videoName }}</div>
         <div class="navBar">
@@ -16,15 +11,18 @@
           <span>{{ videoInEdit + '/' + computeVideos.length }}</span>
           <q-btn color="orange" glossy @click="changeIndex(1)">Next.</q-btn>
         </div>
+        <div class="row">
+          <q-btn @click="deleteVideo" color="red" class="mt-xl">Delete this video</q-btn>
+        </div>
       </div>
       <div class="col editPanel">
         <q-bar class="bg-primary">Other People</q-bar>
         <div class="peopleSelector">
-          <div v-for="(o, i) in partyOptions" :key="i" class="peopleOption" @click="toggleParty(o)" :class="{ 'active': activeParties.find(t => t == o.value) }">
+          <div v-for="(o, i) in partyOptions" :key="i" class="peopleOption" @click="toggleParty(o)" :class="{ 'active': videoInEditInfo.participant_tags.find(t => t == o.value) }">
             <img :src="'/img/people/' + o.img">
           </div>
         </div>
-        <VideoActionPicker v-model="videoActions" ref="actionPicker" @update:model-value="onActionChange"></VideoActionPicker>
+        <VideoActionPicker v-model="videoInEditInfo.action_tags" ref="actionPicker" @update:model-value="onActionChange"></VideoActionPicker>
       </div>
     </div>
 
@@ -34,56 +32,47 @@
 import { defineComponent } from 'vue'
 import CustomMedia from './CustomMedia.vue';
 import VideoActionPicker from './selectors/VideoActionPicker.vue';
-import ClothingPicker from './selectors/ClothingPicker.vue';
-import MoodPicker from './selectors/MoodPicker.vue';
 
 export default defineComponent({
   components: {
     CustomMedia,
-    VideoActionPicker,
-    ClothingPicker,
-    MoodPicker
+    VideoActionPicker
   },
   props: {
-    videos: Array
+    files: {
+      type: Array,
+      default: () => { return [] }
+    }
   },
   emits: ['change'],
   data: function () {
     return {
       actualVideos: [],
+      videosInfos: [],
+
       videoInEdit: 0,
       videoName: '',
 
       videoMainAction: '',
-      videoActions: [],
-      videoTags: [],
-      videoClothing: [],
-      videoPlace: null,
-      videoMood: null,
 
-      placeOptions: [
-        { label: 'Bathroom', value: 'bathroom' },
-        { label: 'Bar', value: 'bar' },
-        { label: 'Beach', value: 'beach' },
-        { label: 'Cafeteria', value: 'cafeteria' },
-        { label: 'Class', value: 'class' },
-        { label: 'Clinic', value: 'clinic' },
-        { label: 'Coffee Shop', value: 'coffee_shop' },
-        { label: 'Glory hole', value: 'glory_hole' },
-        { label: 'Home', value: 'home' },
-        { label: 'Locker Room', value: 'locker_room' },
-        { label: 'Mall', value: 'mall' },
-        { label: 'Office', value: 'office' },
-        { label: 'Park', value: 'park' },
-        { label: 'Pier', value: 'pier' },
-        { label: 'Shower', value: 'shower' },
-        { label: 'Teacher\'s lounge', value: 'lounge' },
-      ],
+      videoInEditInfo: {
+        file: "",
+        action_tags: [],
+        participant_tags: [],
+        weight: 1.0
+      },
+      videoInfoIndex: 0,
+
       partyOptions: [
         { label: 'Alone', value: '', img: 'none.png' },
-        { label: 'Woman', value: 'tp_fem', img: 'woman.png' },
-        { label: 'Mother', value: 'tp_fem,mother', img: 'woman.png' },
-        { label: 'Man', value: 'tp_male', img: 'man.png' },
+        { label: 'Black', value: 'BBC', img: 'black.webp' },
+        { label: 'White', value: 'WHITE_MAN', img: 'white.webp' },
+        { label: 'Asian', value: 'JAPANESE_MAN', img: 'asian.jpg' },
+        { label: 'Cuck', value: 'CUCK_BOYFRIEND', img: 'man.png' },
+        { label: 'Blonde girl', value: 'BLONDE', img: 'blonde.webp' },
+        { label: 'Redhead girl', value: 'REDHEAD', img: 'redhead.webp' },
+        { label: 'Black hair girl', value: 'BLACK_HAIR', img: 'black_hair.webp' },
+        { label: 'Brunette girl', value: 'BRUNETTE', img: 'brunette.jpg' },
       ],
       activeParties: [''],
     }
@@ -91,39 +80,18 @@ export default defineComponent({
   methods: {
     imageChanged() {
       if (this.computeVideos.length > 0) {
-        this.videoTags = []
-        this.videoClothing = []
-        this.videoActions = []
-        this.videoPlace = null
         this.activeParties = []
-        this.videoName = this.computeVideos[this.videoInEdit].split('/').slice(-1)[0]
-        this.videoName = this.removeDigits(this.videoName)
+        this.videoName = this.computeVideos[this.videoInEdit].url.split('/').slice(-1)[0]
+        this.videoName = this.videoName
 
-        var tokens = this.videoName.split('.')[0].split('-');
-        var mainActions = tokens[0].split(',')
+        this.videoInfoIndex = this.videosInfos.findIndex(c => c.file == this.videoName)
+        if (this.videoInfoIndex == -1) {
+          this.videosInfos.push({ file: this.videoName, action_tags: [], participant_tags: [], weight: 1.0 })
+          this.videoInfoIndex = this.videosInfos.findIndex(c => c.file == this.videoName)
+        }
 
-        if (tokens.length > 1) {
-          tokens[1].split(',').forEach((t) => {
-            this.videoTags.push(t)
-          })
-        }
-        this.videoMainAction = mainActions[0]
-        if (this.videoMainAction.split('gloryhole').length > 1) {
-          this.videoMainAction = this.videoMainAction.split('_').slice(1, 50).join('_')
-          this.videoTags.push('glory_hole')
-          this.videoTags.push(this.videoMainAction)
-        }
-        this.videoMood = this.$refs.moodPicker.parse(this.videoTags)
-        this.videoActions = this.$refs.actionPicker.parseTags(mainActions, false)
-        this.videoClothing = this.$refs.clothesPicker.parseTags(this.videoTags, false)
-        this.videoPlace = this.placeOptions.find(p => this.videoTags.includes(p.value))
-        var parties = this.partyOptions.filter(p => this.videoTags.includes(p.value))
-        parties.forEach((p) => {
-          this.activeParties.push(p.value)
-        })
-        if (this.activeParties.length == 0) {
-          this.activeParties.push('')
-        }
+        this.videoInEditInfo = this.videosInfos[this.videoInfoIndex]
+        this.videoInEditInfo.file = this.videoName
       }
     },
     onHover(e) {
@@ -133,30 +101,12 @@ export default defineComponent({
     },
     onChange() {
       setTimeout(() => {
-        var subTags = []
-        var newFileName = this.computeVideos[this.videoInEdit].split('/').slice(0, -1).join('/') + '/'
-          + (this.videoPlace?.value == 'glory_hole' ? 'gloryhole_' : '')
-          + this.videoMainAction
-        if (this.videoClothing.length > 0) {
-          subTags = subTags.concat(this.videoClothing)
+        this.videosInfos[this.videoInfoIndex] = this.videoInEditInfo
+        var videosInfosFile = this.files.find(f => f.type == 'json' && f.url.split('videos/video_tags.json').length > 1)
+        if (videosInfosFile != null) {
+          window.ipcRenderer.send('file:write', { path: videosInfosFile.url, text: JSON.stringify(this.videosInfos) })
         }
-        if (this.activeParties[0] != '') {
-          subTags = subTags.concat(this.activeParties)
-        }
-        if (this.videoMood != null) {
-          subTags.push(this.videoMood)
-        }
-        if (this.videoPlace != null && this.videoPlace.value != 'glory_hole') {
-          subTags.push(this.videoPlace.value)
-        }
-        if (subTags.length > 0) {
-          newFileName += '-' + subTags.join(',')
-        }
-        newFileName += (Math.floor(Math.random() * 2000)) + "." + this.computeVideos[this.videoInEdit].split(".").slice(-1);
-        window.ipcRenderer.send('img:rename', { oldPath: this.computeVideos[this.videoInEdit], newPath: newFileName });
-        this.actualVideos[this.videoInEdit] = newFileName;
-        this.imageChanged()
-        this.$emit("change");
+
       }, 200);
     },
     changeIndex(nb) {
@@ -170,15 +120,6 @@ export default defineComponent({
       }
       this.imageChanged()
     },
-    removeDigits(str) {
-      return str.replace(/[0-9]/g, '')
-    },
-    onStrip(clothe) {
-      if (clothe != '') {
-        this.videoMainAction = 'strip_' + clothe
-      }
-      this.onChange()
-    },
     onActionChange(actions) {
       if (actions.length > 0) {
         this.videoMainAction = actions[0]
@@ -187,16 +128,42 @@ export default defineComponent({
     },
     toggleParty(p) {
       if (p.value === '') {
-        this.activeParties = ['']
+        this.videoInEditInfo.participant_tags = []
       } else {
-        this.activeParties = this.activeParties.filter((o) => o !== '')
-        if (this.activeParties.filter((o) => o == p.value).length > 0) {
-          this.activeParties = this.activeParties.filter((o) => o !== p.value)
+        this.videoInEditInfo.participant_tags = this.videoInEditInfo.participant_tags.filter((o) => o !== '')
+        if (this.videoInEditInfo.participant_tags.filter((o) => o == p.value).length > 0) {
+          this.videoInEditInfo.participant_tags = this.videoInEditInfo.participant_tags.filter((o) => o !== p.value)
         } else {
-          this.activeParties.push(p.value)
+          this.videoInEditInfo.participant_tags.push(p.value)
         }
       }
       this.onChange()
+    },
+    resetIds() {
+      this.computeVideos.forEach((p, i) => {
+        var fileName = p.url
+        var fileExt = fileName.split('.')[1]
+        var newName = fileName.split("/").slice(0, -1).join("/") + "/" + i + "." + fileExt;
+        setTimeout(() => {
+          window.ipcRenderer.send('img:rename', { oldPath: fileName, newPath: newName });
+        }, i * 100)
+
+      });
+    },
+    loadVideos() {
+      this.actualVideos = []
+      var videos = this.files.filter(f => f.type == 'video')
+      videos.forEach((v) => {
+        this.actualVideos.push(v);
+      });
+      // this.actualVideos.sort((a, b) => { return parseInt(a.name.split('.')[0]) < parseInt(b.name.split('.')[0]) ? -1 : 1 })
+      var videosInfos = this.files.find(f => f.type == 'json' && f.url.split('videos/video_tags.json').length > 1)
+      if (videosInfos != null) {
+        this.videosInfos = JSON.parse(videosInfos.content)
+      }
+    },
+    deleteVideo() {
+      window.ipcRenderer.send('file:delete', { path: this.computeVideos[this.videoInEdit].url });
     }
   },
   computed: {
@@ -205,12 +172,17 @@ export default defineComponent({
     }
   },
   created() {
-    this.videos.forEach((v) => {
-      this.actualVideos.push(v);
-    });
+    this.loadVideos()
   },
   mounted() {
+    this.loadVideos()
     this.imageChanged()
+    console.log(this.files)
+  },
+  watch: {
+    files(newV) {
+      console.log(newV)
+    }
   }
 })
 </script>
@@ -218,7 +190,7 @@ export default defineComponent({
 .pageBody {
   display: flex;
   justify-content: space-between;
-  align-items: start;
+  align-items: flex-start;
   flex-flow: row wrap;
 }
 

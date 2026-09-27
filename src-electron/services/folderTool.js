@@ -1,6 +1,9 @@
 const fs = require("fs");
 const { readdir } = require("fs").promises;
-const GIRLS_BASE_PATH = "packsCA";
+const GIRLS_BASE_PATH = "packsGB";
+
+const IMG_FORMATS = ['png', 'jpg', 'jpeg', 'gif']
+const VIDEO_FORMATS = ['webm', 'mp4', 'webp']
 
 import ImageTool from "./imageTool";
 
@@ -13,17 +16,9 @@ class FolderTool {
 
   // --------- GIRLS TOOLS
 
-  writeGirlInfoFile(girlName, girlObject) {
-    if (girlName != "") {
-      this.writeFile(
-        GIRLS_BASE_PATH + "/" + girlName + "/girl_config.json",
-        girlObject
-      );
-    }
-  }
   async readGirlInfoFile(girlName) {
     var file = await this.readFile(
-      GIRLS_BASE_PATH + "/" + girlName + "/girl_config.json"
+      GIRLS_BASE_PATH + "/" + girlName + "/mod_info.json"
     );
     var girlObject = JSON.parse(file);
     return girlObject;
@@ -34,15 +29,14 @@ class FolderTool {
     try {
       if (!fs.existsSync(url)) {
         fs.mkdirSync(url);
-        fs.mkdirSync(url + "/body_images");
-        fs.mkdirSync(url + "/events");
-        fs.mkdirSync(url + "/photoshoots");
-        fs.mkdirSync(url + "/videoshoots");
-        fs.mkdirSync(url + "/fullbody");
-        fs.mkdirSync(url + "/clothing");
-        fs.mkdirSync(url + "/_shared_photoshoots");
-        fs.mkdirSync(url + "/vids");
-        this.writeGirlInfoFile(girlName, {});
+        fs.mkdirSync(url + "/characters");
+        fs.mkdirSync(url + "/event_cards");
+        fs.mkdirSync(url + "/image_replacements");
+        fs.mkdirSync(url + "/images");
+        fs.mkdirSync(url + "/passives");
+        fs.mkdirSync(url + "/videos");
+        this.writeFile(GIRLS_BASE_PATH + "/" + girlName + "/mod_info.json", {});
+        this.writeFile(GIRLS_BASE_PATH + "/" + girlName + "/videos/video_tags.json", []);
       }
       return true;
     } catch (err) {
@@ -66,13 +60,21 @@ class FolderTool {
 
     for (const item of items) {
       if (item.isDirectory()) {
-        files.push(`${dirName}/${item.name}`);
+        files.push({ url: `${dirName}/${item.name}`, type: 'folder' });
         files = [
           ...files,
           ...(await this.readFolder(`${dirName}/${item.name}`)),
         ];
       } else {
-        files.push(`${dirName}/${item.name}`);
+        if (item.name.split('.json').length > 1) {
+          files.push({ url: `${dirName}/${item.name}`, content: fs.readFileSync(`${dirName}/${item.name}`).toString(), type: 'json', name: item.name })
+        } else {
+          if (VIDEO_FORMATS.includes(item.name.split('.')[1])) {
+            files.push({ url: `${dirName}/${item.name}`, type: 'video', name: item.name });
+          } else if (IMG_FORMATS.includes(item.name.split('.')[1])) {
+            files.push({ url: `${dirName}/${item.name}`, type: 'image', name: item.name });
+          }
+        }
       }
     }
     return files;
@@ -133,6 +135,14 @@ class FolderTool {
       });
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  deleteFile(fileUrl) {
+    try {
+      fs.unlinkSync(fileUrl);
+    } catch (e) {
+      console.log(e)
     }
   }
 }
