@@ -1,38 +1,33 @@
 {
   "name": "wtmeditor",
   "version": "0.0.1",
-  "description": "Wtm Editor with Vue",
-  "productName": "Quasar App",
+  "description": "Brothel King girl pack editor",
+  "productName": "Brothel King Editor",
   "author": "SuperFloch <fierdehache25@gmail.com>",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
-    "test": "echo \"No test specified\" && exit 0",
-    "dev": "quasar dev",
+    "test": "node --test --disable-warning=MODULE_TYPELESS_PACKAGE_JSON \"tests/*.test.mjs\"",
+    "dev": "quasar dev -m electron",
+    "generate:game-data": "node scripts/generate-game-data.mjs",
     "build": "quasar build"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
-    "axios": "^1.2.1",
-    "node-webpmux": "^3.1.7",
-    "@imgly/background-removal-node": "^1.4.5",
     "quasar": "^2.6.0",
     "vue": "^3.0.0",
-    "vue-i18n": "^9.0.0",
     "vue-router": "^4.0.0"
   },
   "devDependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^1.4.1",
-    "@intlify/vite-plugin-vue-i18n": "^3.3.1",
     "@quasar/app-vite": "^1.0.0",
     "autoprefixer": "^10.4.2",
     "electron": "^25.2.0",
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^9.0.0",
-    "fluent-ffmpeg": "^2.1.2",
     "postcss": "^8.4.14",
     "prettier": "^2.5.1",
     "webp-converter": "^2.3.3"

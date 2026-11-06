@@ -1,12 +1,12 @@
 <template>
-  <div @click="imageClick($event)" :class="{ 'wrong': computeNeedConversion, 'tiny': isTiny }" class="p-relative parent">
-    <img :src="computeSrc" v-if="computeMediaType == 'img'" loading="lazy">
-    <video :src="computeSrc" v-if="computeMediaType == 'video'" muted @mouseover="onHover($event)" ref="videoPlayer" @loadeddata="onLoad($event)" loading="lazy" loop autoplay></video>
-    <div class="overlay absolute-center" :class="{ 'hidden': !isConverting }">
-      <q-spinner class="absolute-center" color="white" size="3em" />
+  <div class="media" :class="{ wrong: file.needsConversion }" @click="onClick">
+    <img v-if="file.kind === 'image'" :src="file.url" :alt="file.name" @error="failed = true">
+    <video v-else :src="file.url" muted loop autoplay @error="failed = true"></video>
+    <div v-if="failed" class="message">No preview for this format</div>
+    <div v-if="file.needsConversion && !file.busy" class="message">Badly supported by the game, click to convert</div>
+    <div v-if="file.busy" class="overlay">
+      <q-spinner color="white" size="3em" />
     </div>
-    <canvas ref="canvas" class="hidden"></canvas>
-    <video ref="out" autoplay loop class="hidden"></video>
   </div>
 </template>
 <script>
@@ -14,174 +14,67 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    src: String,
-    forceVideo: {
-      type: Boolean,
-      default: false
-    }
+    file: Object
   },
-  emits: ['click', 'change'],
-  data: function () {
+  emits: ['convert'],
+  data() {
     return {
-      isConverting: false,
-      imgFormats: ['jpg', 'gif', 'png', 'webp'],
-      videoFormats: ['webm', 'avi', 'mp4'],
-      realSrc: '',
-      isTiny: false
-    }
-  },
-  mounted: function () {
-    this.realSrc = this.src;
-  },
-  methods: {
-    imageClick(e) {
-      if (!this.isConverting && this.computeNeedConversion) {
-        this.isConverting = true;
-        var type = this.computeMediaType;
-        if (this.realSrc.split(".")[1] == 'gif' || this.forceVideo) {
-          type = "video";
-        }
-        if (type == "img") {
-          window.ipcRenderer.invoke('img:convert:webp', { img: this.realSrc }).then((newPath) => {
-            if (newPath) {
-              this.realSrc = newPath;
-            }
-            this.isConverting = false;
-          });
-        } else if (type == "video") {
-          if (this.realSrc.split(".")[1] == 'webp') {
-            window.ipcRenderer.invoke('img:getFrames', { img: this.realSrc }).then((success) => {
-              this.realSrc = this.realSrc.split(".")[0] + ".webm";
-              this.isConverting = false;
-            });
-          } else {
-            window.ipcRenderer.invoke('img:convert:webm', { img: this.realSrc }).then((newPath) => {
-              if (newPath) {
-                this.realSrc = newPath;
-              }
-              this.isConverting = false;
-            });
-          }
-        }
-      } else if (this.isTiny) {
-        this.isConverting = true;
-        window.ipcRenderer.invoke('webm:resize', { img: this.realSrc }).then((newPath) => {
-          if (newPath) {
-            this.realSrc = newPath;
-          }
-          this.isConverting = false;
-        });
-      } else if (e.ctrlKey) {
-        console.log('remove BG')
-        window.ipcRenderer.invoke('img:remove-bg', { img: this.realSrc }).then((newPath) => {
-          if (newPath) {
-            this.realSrc = newPath;
-          }
-          this.isConverting = false;
-        });
-      }
-      else {
-        this.$emit('click', this.realSrc)
-      }
-    },
-    isVideoFormat(fp) {
-      return this.videoFormats.includes(fp.split(".")[1]);
-    },
-    isImgFormat(fp) {
-      return this.imgFormats.includes(fp.split(".")[1]);
-    },
-    onHover(e) {
-      if (e.target.paused) {
-        e.target.play();
-      }
-    },
-    onLoad(e) {
-      this.isTiny = e.target.videoWidth < 600;
-    }
-  },
-  computed: {
-    computeMediaType() {
-      return this.isImgFormat(this.realSrc) ? 'img' : (this.isVideoFormat(this.realSrc) ? 'video' : '');
-    },
-    computeNeedConversion() {
-      var type = this.computeMediaType;
-      if (type == 'img') {
-        return this.realSrc.split(".")[1] != "webp" || this.forceVideo
-      } else if (type == "video") {
-        return this.realSrc.split(".")[1] != "webm"
-      } else {
-        return false;
-      }
-    },
-    computeSrc() {
-      return this.realSrc;
+      failed: false
     }
   },
   watch: {
-    src(newV) {
-      this.realSrc = newV;
+    'file.url'() {
+      this.failed = false
+    }
+  },
+  methods: {
+    onClick() {
+      if (this.file.needsConversion) {
+        this.$emit('convert')
+      }
     }
   }
 })
 </script>
-<style>
-.parent {
+<style lang="css" scoped>
+.media {
+  position: relative;
   width: 100%;
   height: 100%;
+}
+
+.media img,
+.media video {
+  display: block;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .wrong {
-  outline: 5px red solid;
+  outline: 3px red solid;
+  cursor: pointer;
 }
 
-.wrong::after {
+.message {
   position: absolute;
-  content: "Wrong format, click to convert";
+  inset: 0;
   margin: auto;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  color: red;
-  height: fit-content;
   width: fit-content;
-  text-align: center;
-  font-size: 2vh;
-  font-weight: bold;
-}
-
-.tiny {
-  outline: 5px yellow solid;
-}
-
-.tiny::after {
-  position: absolute;
-  content: "Too small, click to upscale";
-  margin: auto;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  color: red;
   height: fit-content;
-  width: fit-content;
-  text-align: center;
-  font-size: 2vh;
+  padding: 0.5vh 1vw;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
   font-weight: bold;
+  text-align: center;
 }
 
 .overlay {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: rgba(0, 0, 0, 0.5);
-  transform: none;
-}
-
-img,
-video {
-  margin: auto;
-  display: block;
-  max-width: 100%;
-  max-height: 100%;
 }
 </style>

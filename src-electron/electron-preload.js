@@ -1,88 +1,24 @@
 /**
- * This file is used specifically for security reasons.
- * Here you can access Nodejs stuff and inject functionality into
- * the renderer thread (accessible there through the "window" object)
- *
- * WARNING!
- * If you import anything from node_modules, then make sure that the package is specified
- * in package.json > dependencies and NOT in devDependencies
- *
- * Example (injects window.myAPI.doAThing() into renderer thread):
- *
- *   import { contextBridge } from 'electron'
- *
- *   contextBridge.exposeInMainWorld('myAPI', {
- *     doAThing: () => {}
- *   })
- *
- * WARNING!
- * If accessing Node functionality (like importing @electron/remote) then in your
- * electron-main.js you will need to set the following when you instantiate BrowserWindow:
- *
- * mainWindow = new BrowserWindow({
- *   // ...
- *   webPreferences: {
- *     // ...
- *     sandbox: false // <-- to be able to import @electron/remote in preload script
- *   }
- * }
+ * The interface only reaches the Electron process through window.editor.
+ * Every call resolves with its result, or rejects with a readable error.
  */
 const { contextBridge, ipcRenderer } = require('electron')
 
-// White-listed channels.
-const ipc = {
-    render: {
-        // From render to main.
-        send: [
-            'girl:infos:write',
-            'img:rename',
-            'file:write',
-            'img:upload'
-        ],
-        // From main to render.
-        receive: [
-
-        ],
-        // From render to main and back again.
-        sendReceive: [
-            'folder:load',
-            'folder:create',
-            'file:read',
-            'img:convert:webp',
-            'img:remove-bg',
-            'img:convert:webm',
-            'img:getFrames',
-            'webm:resize',
-            'api:getAll'
-        ]
-    }
+async function call(channel, ...args) {
+  const answer = await ipcRenderer.invoke(channel, ...args)
+  if (!answer.ok) {
+    throw new Error(answer.error)
+  }
+  return answer.data
 }
 
-// Exposed protected methods in the render process.
-contextBridge.exposeInMainWorld(
-    // Allowed 'ipcRenderer' methods.
-    'ipcRenderer', {
-    // From render to main.
-    send: (channel, args) => {
-        const validChannels = ipc.render.send
-        if (validChannels.includes(channel)) {
-            ipcRenderer.send(channel, args)
-        }
-    },
-    // From main to render.
-    receive: (channel, listener) => {
-        const validChannels = ipc.render.receive
-        if (validChannels.includes(channel)) {
-            // Deliberately strip event as it includes `sender`.
-            ipcRenderer.on(channel, (event, ...args) => listener(...args))
-        }
-    },
-    // From render to main and back again.
-    invoke: (channel, args) => {
-        const validChannels = ipc.render.sendReceive
-        if (validChannels.includes(channel)) {
-            return ipcRenderer.invoke(channel, args)
-        }
-    }
-}
-)
+contextBridge.exposeInMainWorld('editor', {
+  listGirls: () => call('girls:list'),
+  createGirl: (girl) => call('girls:create', girl),
+  loadGirl: (girl) => call('girls:load', girl),
+  saveInfos: (girl, infos) => call('girls:save-infos', girl, infos),
+  retag: (girl, rel, base, batch) => call('media:retag', girl, rel, base, batch),
+  convert: (girl, rel, batch) => call('media:convert', girl, rel, batch),
+  deleteMedia: (girl, rel, batch) => call('media:delete', girl, rel, batch),
+  undo: (girl) => call('history:undo', girl)
+})

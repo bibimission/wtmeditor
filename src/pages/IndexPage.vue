@@ -1,26 +1,44 @@
 <template>
   <q-page class="flex">
     <div class="header">
-      <div class="loadDiv row">
-        <q-input v-model="folderPath" label="Girl Name" class="col-6" />
-        <q-btn @click="loadFolder" glossy color="green" class="h-fit">Load</q-btn>
-        <q-btn @click="createFolder" glossy color="purple" class="h-fit">Create</q-btn>
+      <div class="loadDiv">
+        <q-select :model-value="state.girl" :options="state.girls" label="Pack" dense class="packSelect" @update:model-value="load" @popup-show="refreshGirls" />
+        <q-input v-model="newName" label="New pack" dense class="packSelect" @keyup.enter="createPack" />
+        <q-btn glossy color="purple" class="h-fit" :disable="!newName.trim()" @click="createPack">Create</q-btn>
+        <q-btn glossy color="green" class="h-fit" icon="undo" :disable="state.undoCount === 0 || state.converting > 0" @click="undo">
+          <q-badge v-if="state.undoCount > 0" floating color="red">{{ state.undoCount }}</q-badge>
+        </q-btn>
       </div>
       <div class="tabHead">
         <q-tabs v-model="tab">
           <q-tab name="infos" icon="info" label="Infos" />
-          <q-tab name="vids" icon="movie" label="Videos" />
+          <q-tab name="media" icon="movie" label="Media" />
         </q-tabs>
       </div>
+      <q-btn round glossy color="primary" label="?" class="helpButton" title="Tags without media" :disable="!state.girl" @click="showMissing = true" />
+    </div>
+    <MissingTagsDialog v-model="showMissing"></MissingTagsDialog>
+    <div class="notices">
+      <q-banner v-if="state.girl && state.files.length > 0 && !hasProfile" dense class="bg-orange text-white">
+        No picture is tagged profile or portrait: the game will show an error for this girl.
+      </q-banner>
+      <q-banner v-if="toConvert > 0" dense class="bg-orange text-white">
+        {{ toConvert }} file(s) in a format the game reads badly.
+        <template #action>
+          <q-btn flat label="Convert all" :disable="state.converting > 0" @click="convertAll" />
+        </template>
+      </q-banner>
+      <q-banner v-if="state.ignored.length > 0" dense class="bg-grey-7 text-white">
+        Ignored by the game: {{ state.ignored.join(', ') }}
+      </q-banner>
     </div>
     <div class="tabContent">
-      <q-tab-panels v-model="tab" animated class="bg-white text-white">
+      <q-tab-panels v-model="tab" animated class="bg-white">
         <q-tab-panel name="infos">
-          <GirlInfoForm v-model="girlInfos" @change="saveGirl" ref="girlInfoForm"></GirlInfoForm>
+          <GirlInfoForm></GirlInfoForm>
         </q-tab-panel>
-
-        <q-tab-panel name="vids">
-          <VideosSection :videos="computeVideos" @change="loadFolder"></VideosSection>
+        <q-tab-panel name="media">
+          <MediaSection></MediaSection>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -28,54 +46,57 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent } from 'vue'
+import { usePack } from 'src/composables/usePack'
+import { hasTag } from 'src/shared/tagCodec'
 import GirlInfoForm from 'components/GirlInfoForm.vue'
-import VideosSection from 'src/components/VideosSection.vue'
+import MediaSection from 'components/MediaSection.vue'
+import MissingTagsDialog from 'components/MissingTagsDialog.vue'
 
 export default defineComponent({
   name: 'IndexPage',
   components: {
     GirlInfoForm,
-    VideosSection
+    MediaSection,
+    MissingTagsDialog
   },
   setup() {
-    return {
-      tab: ref('infos')
-    }
+    return usePack()
   },
-  data: function () {
+  data() {
     return {
-      folderPath: "",
-      girlInfos: {
-        first_name: "",
-        last_name: ""
-      },
-      medias: []
-    }
-  },
-  methods: {
-    loadFolder() {
-      window.ipcRenderer.invoke('folder:load', { name: this.folderPath }).then((files) => {
-        var data = JSON.parse(files);
-        this.girlInfos = data.infos;
-        if (this.$refs.girlInfoForm) {
-          this.$refs.girlInfoForm.load(data.infos);
-        }
-        this.medias = data.files.filter(f => f.split('.ini').length <= 1);
-      });
-    },
-    createFolder() {
-      window.ipcRenderer.invoke('folder:create', { name: this.folderPath }).then((files) => {
-        console.log(files)
-      });
-    },
-    saveGirl() {
-      window.ipcRenderer.send('girl:infos:write', { name: this.folderPath, girl: JSON.stringify(this.girlInfos) });
+      tab: 'media',
+      newName: '',
+      showMissing: false
     }
   },
   computed: {
-    computeVideos() {
-      return this.medias;
+    hasProfile() {
+      return this.state.files.some((f) => hasTag(f.tokens, 'profile') || hasTag(f.tokens, 'portrait'))
+    },
+    toConvert() {
+      return this.state.files.filter((f) => f.needsConversion).length
+    }
+  },
+  mounted() {
+    this.refreshGirls()
+    window.addEventListener('keydown', this.onKey)
+  },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.onKey)
+  },
+  methods: {
+    async createPack() {
+      if (await this.create(this.newName)) {
+        this.newName = ''
+      }
+    },
+    onKey(event) {
+      const typing = /^(INPUT|TEXTAREA)$/.test(event.target.tagName)
+      if (event.ctrlKey && event.key.toLowerCase() === 'z' && !typing) {
+        event.preventDefault()
+        this.undo()
+      }
     }
   }
 })
@@ -96,12 +117,16 @@ export default defineComponent({
 
 .loadDiv {
   display: flex;
-  width: 30vw;
+  gap: 0.8vw;
   border: var(--color-fourth) solid 3px;
-  padding: 1vh 0;
+  padding: 1vh 1vw;
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0.2);
+}
+
+.packSelect {
+  width: 12vw;
 }
 
 .tabHead {
@@ -110,8 +135,17 @@ export default defineComponent({
   height: fit-content;
 }
 
+.helpButton {
+  align-self: center;
+  margin-right: 1vw;
+}
+
+.notices,
 .tabContent {
   width: 100%;
+}
+
+.tabContent {
   height: fit-content;
 }
 

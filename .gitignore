@@ -6,6 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 packs/
+packsBK/
+packsCA/
+packsGB/
 .quasar
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
@@ -104,3 +107,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+/public/img/boobs
+/public/img/mind

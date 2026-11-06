@@ -3,7 +3,7 @@
     <q-header elevated>
       <q-toolbar class="glossy">
         <q-toolbar-title>
-          WTM Editor
+          Brothel King Editor
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'MainLayout',

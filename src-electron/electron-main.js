@@ -2,8 +2,6 @@ import { app, BrowserWindow, nativeTheme, ipcMain } from 'electron'
 import path from 'path'
 import os from 'os'
 import FolderTool from './services/folderTool';
-import ImageTool from './services/imageTool';
-import ApiTool from './services/apiTool';
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -14,8 +12,7 @@ try {
   }
 } catch (_) { }
 
-const folderTool = new FolderTool();
-const apiTool = new ApiTool();
+const folderTool = new FolderTool('packsBK');
 
 let mainWindow
 
@@ -25,8 +22,8 @@ function createWindow () {
    */
   mainWindow = new BrowserWindow({
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
-    width: 1000,
-    height: 600,
+    width: 1400,
+    height: 900,
     useContentSize: true,
     webPreferences: {
       contextIsolation: true,
@@ -66,43 +63,24 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.on('girl:infos:write', (e, data) => {
-  folderTool.writeGirlInfoFile(data.name, data.girl);
-})
+const handlers = {
+  'girls:list': () => folderTool.listGirls(),
+  'girls:create': (girl) => folderTool.createGirl(girl),
+  'girls:load': (girl) => folderTool.loadGirl(girl),
+  'girls:save-infos': (girl, infos) => folderTool.saveInfos(girl, infos),
+  'media:retag': (girl, rel, base, batch) => folderTool.retag(girl, rel, base, batch),
+  'media:convert': (girl, rel, batch) => folderTool.convert(girl, rel, batch),
+  'media:delete': (girl, rel, batch) => folderTool.deleteMedia(girl, rel, batch),
+  'history:undo': (girl) => folderTool.undo(girl)
+}
 
-ipcMain.handle('folder:load', async (e, data) => {
-  return await folderTool.readGirlFolder(data.name);
-})
-ipcMain.handle('folder:create', async (e, data) => {
-  return folderTool.createGirlFolder(data.name);
-})
-ipcMain.handle('img:convert:webp', async (e, data) => {
-  return await ImageTool.convertImageToWebp(data.img)
-})
-ipcMain.handle('img:convert:webm', async (e, data) => {
-  return await ImageTool.convertGifToWebm(data.img)
-})
-ipcMain.handle('img:remove-bg', async(e, data) => {
-  return await ImageTool.removeImageBackground(data.img)
-})
-ipcMain.handle('webm:resize', async (e, data) => {
-  return await ImageTool.resizeWebm(data.img)
-})
-ipcMain.handle('img:getFrames', async (e, data) => {
-  return await ImageTool.convertWebpToWebm(data.img);
-})
-ipcMain.handle('api:getAll', async (e, data) => {
-  return await apiTool.getCharacterList();
-})
-ipcMain.handle('file:read', async (e, data) => {
-  return await folderTool.readFile(data.path);
-})
-ipcMain.on('img:rename', (e, data) => {
-  folderTool.renameFile(data.oldPath, data.newPath)
-})
-ipcMain.on('file:write', (e, data) => {
-  folderTool.writeFile(data.path, data.text)
-})
-ipcMain.on('img:upload', (e, data) => {
-  folderTool.uploadFile(data.path, data.buffer);
-})
+for (const [channel, handler] of Object.entries(handlers)) {
+  ipcMain.handle(channel, async (e, ...args) => {
+    try {
+      return { ok: true, data: await handler(...args) }
+    } catch (error) {
+      console.error(channel, error)
+      return { ok: false, error: error.message }
+    }
+  })
+}

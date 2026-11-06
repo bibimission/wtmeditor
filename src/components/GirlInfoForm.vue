@@ -1,43 +1,46 @@
 <template>
   <div class="formBody">
-    <div class="row">
-      <div class="infoBlock baseInfo">
-        <q-bar class="bg-primary">Base informations</q-bar>
-        <q-input v-model="first_name" label="First Name" @change="onChange" />
-        <q-input v-model="last_name" label="Last Name" @change="onChange" />
-      </div>
+    <q-banner v-if="state.infos.needsRepair" dense class="bg-orange text-white">
+      The game ignores the names of this _BK.ini because they have no quotes.
+      <template #action>
+        <q-btn flat label="Repair" @click="save" />
+      </template>
+    </q-banner>
+    <div class="infoBlock">
+      <q-bar class="bg-primary">Base informations</q-bar>
+      <q-input v-model="firstName" label="First Name" :disable="!state.girl" @change="save" />
+      <q-input v-model="lastName" label="Last Name" :disable="!state.girl" @change="save" />
     </div>
   </div>
 </template>
 <script>
 import { defineComponent } from 'vue'
+import { usePack } from 'src/composables/usePack'
 
 export default defineComponent({
-  props: {
-    modelValue: Object
+  setup() {
+    const { state, saveInfos } = usePack()
+    return { state, saveInfos }
   },
-  emits: ['change', 'update:modelValue'],
-  data: function () {
+  data() {
     return {
-      first_name: "",
-      last_name: ""
+      firstName: '',
+      lastName: ''
+    }
+  },
+  watch: {
+    'state.infos': {
+      immediate: true,
+      handler(infos) {
+        this.firstName = infos.first_name
+        this.lastName = infos.last_name
+      }
     }
   },
   methods: {
-    onChange() {
-      this.$emit('update:modelValue', {
-        first_name: this.first_name,
-        last_name: this.last_name
-      });
-      this.$emit('change');
-    },
-    load(girlObject) {
-      this.first_name = girlObject.first_name;
-      this.last_name = girlObject.last_name;
+    save() {
+      this.saveInfos({ first_name: this.firstName, last_name: this.lastName })
     }
-  },
-  mounted() {
-    this.load(this.modelValue)
   }
 })
 </script>
@@ -45,33 +48,19 @@ export default defineComponent({
 .formBody {
   display: flex;
   flex-direction: column;
-}
-
-.row {
-  justify-content: space-between;
+  gap: 2vh;
+  color: black;
 }
 
 .q-bar {
+  color: white;
   margin-bottom: 1vh;
 }
 
 .infoBlock {
-  display: inline-block;
+  width: 20vw;
   border-radius: 5px;
   padding: 0 2vw 2vh 2vw;
   border: solid 2px rgb(185, 185, 185);
-  margin-bottom: 2vh;
-}
-
-.baseInfo {
-  width: 20vw;
-}
-
-.areaSelect {
-  color: black;
-}
-
-.areaBlock {
-  width: 30vw;
 }
 </style>
